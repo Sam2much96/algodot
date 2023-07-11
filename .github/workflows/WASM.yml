@@ -2,9 +2,9 @@ name: WASM CI
 
 on:
   push:
-    branches: [ TESTNET ]
+    branches: [ Godot-4.0-GDExtension ]
   pull_request:
-    branches: [ TESTNET ]
+    branches: [ Godot-4.0-GDExtension ]
     
 env:
   CARGO_TERM_COLOR: always

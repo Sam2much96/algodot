@@ -5,9 +5,9 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ Godot-4.0-GDExtension ]
   pull_request:
-    branches: [ master ]
+    branches: [ Godot-4.0-GDExtension ]
 
 env:
   CARGO_TERM_COLOR: always
