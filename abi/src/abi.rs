@@ -1,11 +1,22 @@
+/*
+
+    ABI SMARTCONTRACT RUST IMPLEMENTATION
+
 //code reference: https://github.com/manuelmauro/algonaut/blob/main/tests/step_defs/integration/abi.rs
+
+    TO-DO:
+
+    (1) Re-format
+    (2) Fix Unused import
+    (3) Implement More Algonaut features
+*/
 
 pub mod abi_smartcontract {
 
     use algonaut::abi::abi_interactions::AbiMethod;
     use algonaut::abi::abi_type::AbiType;
-    use gdnative::core_types::Variant;
-    use gdnative::prelude::ToVariant;
+    use godot::builtin::Variant;
+    use godot::prelude::ToVariant;
 
     pub struct Foo {
         pub name: String,
@@ -192,10 +203,10 @@ pub mod escrow {
 
     use algonaut::atomic_transaction_composer::transaction_signer::TransactionSigner::BasicAccount;
     use algonaut::atomic_transaction_composer::AbiMethodResult;
-    use algonaut::atomic_transaction_composer::ExecuteResult;
-    use gdnative::core_types::Dictionary;
-    use gdnative::core_types::Variant;
-    use gdnative::prelude::OwnedToVariant;
+    //use algonaut::atomic_transaction_composer::ExecuteResult;
+    //use godot::builtin::Dictionary;
+    //use godot::builtin::Variant;
+    //use godot::prelude::ToVariant;
 
     #[derive(Debug, Clone)]
     pub struct Foo<'a> {
@@ -231,10 +242,6 @@ pub mod escrow {
         }
     }
 
-    pub trait ToVariant {
-        fn to_variant(&self) -> Variant;
-    }
-
     /* Trait Implementations*/
 
     impl MyTrait for Foo<'_> {
@@ -246,27 +253,6 @@ pub mod escrow {
         type ServiceError = Option<ServiceError>;
         fn _app_id(&self, x: u64) -> u64 {
             x
-        }
-    }
-
-    impl ToVariant for ExecuteResult {
-        //type ServiceError;
-
-        fn to_variant(&self) -> Variant {
-            /*
-            ExecuteResult{
-                confirmed_round: None, //Some(x.confirmed_round),
-                tx_ids: x.tx_ids,
-                method_results: x.method_results,
-            }
-
-            */
-
-            let dict = Dictionary::new();
-            dict.insert("confirmed_round", Some(self.confirmed_round));
-            dict.insert("tx_ids", self.tx_ids.clone());
-            //dict.insert("method_results", self.method_results);
-            dict.owned_to_variant()
         }
     }
 

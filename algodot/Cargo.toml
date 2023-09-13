@@ -10,8 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 tokio = { version = "1.10", features = ["rt"] }
-godot = { git = "https://github.com/godot-rust/gdext", default-features = false, branch = "master" }
-gdnative = { git = "https://github.com/godot-rust/godot-rust.git", features = ["async"]}
+godot = { git = "https://github.com/godot-rust/gdext", default-features = true, branch = "master" }
 futures = "0.3"
 algonaut = { git = "https://github.com/manuelmauro/algonaut", rev = "75bce54" }
 num-bigint = {git = "https://github.com/rust-num/num-bigint", version = "0.4.3"}

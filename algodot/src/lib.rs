@@ -1,4 +1,4 @@
-use gdnative::prelude::*;
+use godot::prelude::*;
 use tokio::{
     runtime::{Builder, Runtime},
     task::LocalSet,
@@ -29,7 +29,9 @@ impl futures::task::LocalSpawn for SharedLocalPool {
     }
 }
 
-#[derive(NativeClass)]
+/* Using Async Cookbook Recipie to handle Async Tasks using Threads*/
+
+#[derive(GodotClass)]
 #[inherit(Node)]
 struct AsyncExecutorDriver {
     runtime: Runtime,
@@ -63,11 +65,15 @@ impl AsyncExecutorDriver {
     }
 }
 
+// Rewrite Macros using gdext
+#[gdextension]
+#[godot_api]
+
 fn init(handle: InitHandle) {
-    gdnative::tasks::register_runtime(&handle);
-    gdnative::tasks::set_executor(EXECUTOR.with(|e| *e));
+    //gdnative::tasks::register_runtime(&handle);
+    //gdnative::tasks::set_executor(EXECUTOR.with(|e| *e));
     handle.add_class::<algod::Algodot>();
     handle.add_class::<AsyncExecutorDriver>();
 }
 
-godot_init!(init);
+/* godot_init!(init); */

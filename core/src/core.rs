@@ -1,3 +1,10 @@
+/*
+
+    CORE
+
+    Implements Algonaut Core as a Godot Rust Macro & Module
+
+*/
 //Interracts with the godot debugger. Handles transaction types and prints out Algod node errors
 // It uses Transaction Types to trigger a state machine in Algodot core.rs
 
@@ -14,8 +21,10 @@ use algonaut::transaction::transaction::{
 use algonaut::transaction::{SignedTransaction, Transaction, TransactionType};
 use algonaut::{core::Address, error::ServiceError};
 use derive_more::{Deref, DerefMut, From, Into};
-use gdnative::api::JSON;
-use gdnative::prelude::*;
+use godot::builtin::GodotString;
+use godot::builtin::*;
+use godot::engine::Json;
+use godot::prelude::*;
 use serde::Serialize;
 use std::str::FromStr;
 use thiserror::Error;
@@ -28,21 +37,18 @@ use thiserror::Error;
 
 // TODO: remove to_json_dict. Implement ToVariant for types instead
 //#[deprecated]
+/*
 pub fn to_json_dict<T: Serialize>(r: &T) -> Variant {
-    let str = serde_json::to_string(r).unwrap();
-    unsafe {
-        JSON::godot_singleton()
-            .parse(str)
-            .unwrap()
-            .assume_safe()
-            .result()
-    }
+    let str: GodotString = GodotString::from(serde_json::to_string(r).unwrap());
+    unsafe { Json::new().parse(str).unwrap().assume_safe().result() }
 }
 
 #[allow(dead_code)]
-pub fn to_json_string<T: OwnedToVariant + ToVariant>(r: &T) -> GodotString {
-    JSON::godot_singleton().print(r, "", false)
+pub fn to_json_string<T: ToVariant>(r: &T) -> GodotString {
+    Json::godot_singleton().print(r, "", false)
 }
+
+*/
 
 #[derive(Error, Debug)]
 pub enum AlgodotError {
@@ -63,11 +69,31 @@ impl From<ServiceError> for AlgodotError {
 #[derive(Debug, Deref, DerefMut, From)]
 pub struct MyAddress(Address);
 
+/* To odotString Trait for My Address*/
+trait MyAddressTrait {
+    //type GodotString;
+    fn to_string(variant: &Variant) -> GodotString; // Use associated type for Future
+}
+
+impl MyAddressTrait for MyAddress {
+    fn to_string(variant: &Variant) -> GodotString {
+        todo!()
+    }
+}
+
 impl FromVariant for MyAddress {
-    fn from_variant(variant: &Variant) -> Result<Self, FromVariantError> {
+    fn from_variant(variant: &Variant) -> MyAddress {
         Address::from_str(&variant.to_string())
-            .map_err(FromVariantError::Custom)
+            //.map_err(VariantConversionError::BadType)
+            //.map_err(VariantConversionError::BadValue)
+            //.map_err(VariantConversionError::MissingValue)
+            //.map_err(VariantConversionError::VariantIsNil)
             .map(MyAddress)
+            .unwrap()
+    }
+
+    fn try_from_variant(variant: &Variant) -> Result<Self, VariantConversionError> {
+        todo!()
     }
 }
 
@@ -81,10 +107,16 @@ impl ToVariant for MyAddress {
 pub struct MyAccount(Account);
 
 impl FromVariant for MyAccount {
-    fn from_variant(variant: &Variant) -> Result<Self, FromVariantError> {
+    fn from_variant(variant: &Variant) -> MyAccount {
         Account::from_mnemonic(&variant.to_string())
-            .map_err(|err| FromVariantError::Custom(err.to_string()))
+            //.map_err(|err| VariantConversionError::BadType(err.to_string()))
             .map(MyAccount)
+            .unwrap()
+    }
+
+    // Required method
+    fn try_from_variant(variant: &Variant) -> Result<Self, VariantConversionError> {
+        todo!()
     }
 }
 
@@ -97,32 +129,52 @@ impl MyAccount {
 #[derive(Deref, DerefMut, From, Clone)]
 pub struct MySuggestedTransactionParams(SuggestedTransactionParams);
 
+/*Engine Enum Traits */
+pub trait EngineEnum {
+    // Required methods
+    fn try_from_ord(ord: i32) -> Option<Self>;
+    fn ord(self) -> i32;
+
+    // Provided method
+    fn from_ord(ord: i32) -> Self {
+        todo!()
+    }
+}
+
+impl EngineEnum for MySuggestedTransactionParams {
+    fn try_from_ord(ord: i32) -> Option<Self> {
+        todo!()
+    }
+    fn ord(self) -> i32 {
+        todo!()
+    }
+
+    // Provided method
+    fn from_ord(ord: i32) -> Self {
+        todo!()
+    }
+}
+
 //used when constructing To a variant
 impl ToVariant for MySuggestedTransactionParams {
     fn to_variant(&self) -> Variant {
-        let dict = Dictionary::new();
-        dict.insert("genesis_id", &self.genesis_id);
+        let mut dict = Dictionary::new();
+        dict.insert("genesis_id", *&self.genesis_id);
         dict.insert("first_valid", self.first_valid.0);
         dict.insert("last_valid", self.last_valid.0);
-        dict.insert("consensus_version", &self.consensus_version);
+        dict.insert("consensus_version", *&self.consensus_version);
         dict.insert("min_fee", self.min_fee.0);
         dict.insert("fee_per_byte", self.fee_per_byte.0);
-        dict.insert(
-            "genesis_hash",
-            PoolArray::<u8>::from_slice(&self.genesis_hash.0),
-        );
-        dict.owned_to_variant()
+        dict.insert("genesis_hash", PackedByteArray::from(&self.genesis_hash.0));
+        dict.to_variant()
     }
 }
 
 impl FromVariant for MySuggestedTransactionParams {
     fn from_variant(variant: &Variant) -> Result<Self, FromVariantError> {
-        let dict = variant
+        let mut dict = variant
             .to::<Dictionary>()
-            .ok_or(FromVariantError::InvalidVariantType {
-                variant_type: variant.get_type(),
-                expected: VariantType::Dictionary,
-            })?;
+            .ok_or(VariantConversionError::BadType)?;
 
         let t = SuggestedTransactionParams {
             genesis_id: get_string(&dict, "genesis_id")?,
@@ -164,7 +216,7 @@ impl ToVariant for MyTransaction {
         dict.insert(
             "type",
             match &self.txn_type {
-                //state machine prints to debug log : https://docs.rs/algonaut_transaction/0.4.2/algonaut_transaction/transaction/enum.TransactionType.html
+                //state machine prints to debug log: https://docs.rs/algonaut_transaction/0.4.2/algonaut_transaction/transaction/enum.TransactionType.html
                 TransactionType::Payment(payment) => {
                     dict.insert("snd", MyAddress::from(payment.sender));
                     dict.insert("rcv", MyAddress::from(payment.receiver));

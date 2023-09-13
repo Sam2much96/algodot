@@ -21,8 +21,9 @@ use gdnative::tasks::{Async, AsyncMethod, Spawner};
 use std::rc::Rc;
 
 use algonaut::atomic_transaction_composer::{AddMethodCallParams, ExecuteResult};
+use paste::*;
 
-#[derive(NativeClass, Clone)]
+#[derive(GodotClass, Clone)]
 #[inherit(Node)]
 #[register_with(Self::register)]
 pub struct Algodot {
@@ -430,7 +431,7 @@ impl Algodot {
 }
 
 /*ASync Methods*/
-
+/* Impelements Async Methods using Algodot Macros, Handles Error and maps the results to algod and node objects*/
 asyncmethods!(algod, node, this,
     fn health(_ctx, _args) {
         async move {
