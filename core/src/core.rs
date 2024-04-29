@@ -132,7 +132,7 @@ pub struct MySuggestedTransactionParams(SuggestedTransactionParams);
 /*Engine Enum Traits */
 pub trait EngineEnum {
     // Required methods
-    fn try_from_ord(ord: i32) -> Option<Self>;
+    fn try_from_ord(ord: i32) -> None;
     fn ord(self) -> i32;
 
     // Provided method
