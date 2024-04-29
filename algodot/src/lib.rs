@@ -32,7 +32,7 @@ impl futures::task::LocalSpawn for SharedLocalPool {
 /* Using Async Cookbook Recipie to handle Async Tasks using Threads*/
 
 #[derive(GodotClass)]
-#[inherit(Node)]
+#[class(base=Node)]
 struct AsyncExecutorDriver {
     runtime: Runtime,
 }
@@ -49,9 +49,9 @@ impl AsyncExecutorDriver {
     }
 }
 
-#[methods]
+//#[func]//[async] //[func] //#[methods]
 impl AsyncExecutorDriver {
-    #[method]
+    //#[func]
     fn _process(&self, _delta: f64) {
         EXECUTOR.with(|e| {
             self.runtime
@@ -66,14 +66,14 @@ impl AsyncExecutorDriver {
 }
 
 // Rewrite Macros using gdext
-#[gdextension]
-#[godot_api]
+//#[gdextension]
+//#[godot_api]
 
-fn init(handle: InitHandle) {
-    //gdnative::tasks::register_runtime(&handle);
-    //gdnative::tasks::set_executor(EXECUTOR.with(|e| *e));
-    handle.add_class::<algod::Algodot>();
-    handle.add_class::<AsyncExecutorDriver>();
-}
+//fn init(handle: InitHandle) {
+//gdnative::tasks::register_runtime(&handle);
+//gdnative::tasks::set_executor(EXECUTOR.with(|e| *e));
+//    handle.add_class::<algod::Algodot>();
+//    handle.add_class::<AsyncExecutorDriver>();
+//}
 
 /* godot_init!(init); */

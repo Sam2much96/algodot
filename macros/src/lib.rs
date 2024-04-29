@@ -1,4 +1,4 @@
-pub use paste::paste;
+/* pub use paste::paste;
 
 /// Macro for simplifying AsyncMethod impl
 #[macro_export]
@@ -46,3 +46,5 @@ macro_rules! godot_unwrap {
         }
     };
 }
+
+*/

@@ -1,40 +1,48 @@
 //use algodot_abi::abi_smartcontract::*;
 use algodot_abi::abi_smartcontract::Foo as abiFoo;
 use algodot_abi::escrow::Foo as escrowFoo;
-use algodot_core::*;
+use algodot_core::*; //temprarily disabled for refactoring
 use algodot_macros::*;
+
+// All Algonaut Classes should be exposed in their sub modules, sharing only core algorand scripts required for txn signing
+
 use algonaut::algod::v2::Algod;
-use algonaut::core::{Address as OtherAddress, MicroAlgos, Round};
-use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
-use algonaut::transaction::transaction::{
-    ApplicationCallOnComplete::NoOp, AssetAcceptTransaction, AssetConfigurationTransaction,
-    AssetParams, AssetTransferTransaction,
-};
-use algonaut::transaction::tx_group::TxGroup;
-use algonaut::transaction::{
-    account::Account as OtherAccount, builder::CallApplication, Pay, TransactionType, TxnBuilder,
-};
-use gdnative::api::Engine;
-use gdnative::prelude::*;
-use gdnative::tasks::{Async, AsyncMethod, Spawner};
+//use algonaut::core::{Address as OtherAddress, MicroAlgos, Round};
+//use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
+//use algonaut::transaction::transaction::{
+//    ApplicationCallOnComplete::NoOp, AssetAcceptTransaction, AssetConfigurationTransaction,
+//    AssetParams, AssetTransferTransaction,
+//};
+//use algonaut::transaction::tx_group::TxGroup;
+//use algonaut::transaction::{
+//    account::Account as OtherAccount, builder::CallApplication, Pay, TransactionType, TxnBuilder,
+//};
+// Gdnative is depreciated in godot 4.0 using gdext instead
+//use gdnative::tasks::{Async, AsyncMethod, Spawner};
+use godot::builtin::*;
+use godot::engine::Engine;
+use godot::prelude::*;
 
-use std::rc::Rc;
+use std::rc::Rc; //used for reference counting
 
-use algonaut::atomic_transaction_composer::{AddMethodCallParams, ExecuteResult};
-use paste::*;
+//use algonaut::atomic_transaction_composer::{AddMethodCallParams, ExecuteResult};
+//use paste::*;
 
 #[derive(GodotClass, Clone)]
-#[inherit(Node)]
-#[register_with(Self::register)]
-pub struct Algodot {
-    #[property(set = "Self::set_url")]
-    url: String,
+#[class(base=Node)]
+//#[register_with(Self::register)] //depreciated macro
 
-    #[property(set = "Self::set_token")]
+// disabled for refactoring
+pub struct Algodot {
+    //    //property macro?
+    //    #[property(set = "Self::set_url")]
+    url: String,
+    //
+    //    #[property(set = "Self::set_token")]
     token: String,
 
-    #[property(set = "Self::set_headers")]
-    headers: PoolArray<GodotString>,
+    //    #[property(set = "Self::set_headers")]
+    headers: PackedStringArray, //PoolArray<GodotString>,
 
     algod: Rc<Algod>,
 }
@@ -44,7 +52,7 @@ impl Algodot {
         Algodot {
             url: String::new(),
             token: String::new(),
-            headers: PoolArray::<GodotString>::new(),
+            headers: PackedStringArray::new(),
 
             // algod will be initialised on _enter_tree()
             // leave these default values here for now
@@ -57,131 +65,135 @@ impl Algodot {
             ),
         }
     }
+    /* Depreciated method instead, call the #[derive(GodotClass)] macro instead*/
+    //fn register(builder: &ClassBuilder<Algodot>) {
+    //    Self::register_signals(builder);
+
+    // made with asyncmethods! macro
+    //    register_methods(builder);
+    //}
+
+    //fn register_signals(builder: &ClassBuilder<Algodot>) {
+    //    builder
+    //        .signal("transaction_confirmed")
+    //        .with_param_custom(SignalParam {
+    //            name: "transaction_info".into(),
+    //            default: ().to_variant(),
+    //            export_info: ExportInfo::new(VariantType::Dictionary),
+    //            usage: PropertyUsage::DEFAULT,
+    //        })
+    //        .done();
+    //}
 
     /* */
-    fn register(builder: &ClassBuilder<Algodot>) {
-        Self::register_signals(builder);
 
-        // made with asyncmethods! macro
-        register_methods(builder);
-    }
-
-    fn register_signals(builder: &ClassBuilder<Algodot>) {
-        builder
-            .signal("transaction_confirmed")
-            .with_param_custom(SignalParam {
-                name: "transaction_info".into(),
-                default: ().to_variant(),
-                export_info: ExportInfo::new(VariantType::Dictionary),
-                usage: PropertyUsage::DEFAULT,
-            })
-            .done();
-    }
-
-    async fn wait_for_transaction(
-        algod: Rc<Algod>,
-        tx: TransactionResponse,
-    ) -> Result<PendingTransaction, AlgodotError> {
-        let status = algod.status().await?;
-        let mut round = status.last_round - 1;
-        loop {
-            algod.status_after_round(Round(round)).await?;
-            let txn = algod.pending_transaction_with_id(&tx.tx_id).await?;
-            if let Some(confirmed_round) = txn.confirmed_round {
-                if confirmed_round != 0 {
-                    return Ok(txn);
-                }
-            } else if !txn.pool_error.is_empty() {
-                return Err(AlgodotError::PoolError(txn.pool_error));
-            }
-            round += 1;
-        }
-    }
+    /* */
+    //async fn wait_for_transaction(
+    //    algod: Rc<Algod>,
+    //    tx: TransactionResponse,
+    //) -> Result<PendingTransaction, AlgodotError> {
+    //    let status = algod.status().await?;
+    //    let mut round = status.last_round - 1;
+    //    loop {
+    //        algod.status_after_round(Round(round)).await?;
+    //        let txn = algod.pending_transaction_with_id(&tx.tx_id).await?;
+    //        if let Some(confirmed_round) = txn.confirmed_round {
+    //            if confirmed_round != 0 {
+    //                return Ok(txn);
+    //            }
+    //        } else if !txn.pool_error.is_empty() {
+    //            return Err(AlgodotError::PoolError(txn.pool_error));
+    //        }
+    //        round += 1;
+    //   }
+    //}
 }
 
-#[methods]
+#[godot_api] //#[methods]
 impl Algodot {
-    #[method]
-    fn _enter_tree(&mut self, #[base] _base: TRef<Node>) {
-        self.update_algod();
-    }
+    // Temporarily disabing for debugging
+    //#[func]
+    //fn _enter_tree(&mut self) {
+    //    self.update_algod();
+    //}
 
-    #[method]
-    fn set_url(&mut self, #[base] _base: TRef<Node>, url: String) {
-        self.url = url;
-        self.update_algod();
-    }
+    //#[func]
+    //fn set_url(&mut self) {
+    //    self.url = url;
+    //    self.update_algod();
+    //}
 
-    #[method]
-    fn set_token(&mut self, #[base] _base: TRef<Node>, token: String) {
-        self.token = token;
-        self.update_algod();
-    }
+    //#[func]
+    //fn set_token(&mut self, token: String) {
+    //    self.token = token;
+    //    self.update_algod();
+    //}
 
-    #[method]
-    fn set_headers(&mut self, #[base] _base: TRef<Node>, headers: PoolArray<GodotString>) {
-        self.headers = headers;
-        self.update_algod();
-    }
+    //#[func]
+    //fn set_headers(&mut self, headers: PackedStringArray) {
+    //    self.headers = headers;
+    //    self.update_algod();
+    //}
 
-    fn update_algod(&mut self) {
-        // Do not update while in editor
-        // e.g. editing properties in the inspector
-        if Engine::godot_singleton().is_editor_hint() {
-            return;
-        }
-        let algod: Algod;
-        if self.token.is_empty() {
-            let headers = self
-                .headers
-                .read()
-                .iter()
-                .map(|header| -> Result<(String, String), AlgodotError> {
-                    let header = &header.to_string();
-                    let mut split = header.split(": ");
+    //#[func]
+    //fn update_algod(&mut self) {
+    // Do not update while in editor
+    // e.g. editing properties in the inspector
+    //   if Engine::godot_singleton().is_editor_hint() {
+    //       return;
+    //   }
+    //    let algod: Algod;
+    //    if self.token.is_empty() {
+    //        let headers = self
+    //            .headers
+    //            .read()
+    //            .iter()
+    //            .map(|header| -> Result<(String, String), AlgodotError> {
+    //                let header = &header.to_string();
+    //                let mut split = header.split(": ");
 
-                    let get_string = |split: &mut std::str::Split<&str>| {
-                        split
-                            .next()
-                            .map(|str| str.to_string())
-                            .ok_or(AlgodotError::HeaderParseError)
-                    };
+    //                let get_string = |split: &mut std::str::Split<&str>| {
+    //                    split
+    //                        .next()
+    //                        .map(|str| str.to_string())
+    //                        .ok_or(AlgodotError::HeaderParseError)
+    //               };
 
-                    Ok((get_string(&mut split)?, get_string(&mut split)?))
-                })
-                .collect::<Result<Vec<(String, String)>, AlgodotError>>();
+    //                Ok((get_string(&mut split)?, get_string(&mut split)?))
+    //            })
+    //            .collect::<Result<Vec<(String, String)>, AlgodotError>>();
 
-            if let Some(headers) = godot_unwrap!(headers) {
-                let headers: Vec<(&str, &str)> = headers
-                    .iter()
-                    .map(|(str1, str2)| -> (&str, &str) { (str1, str2) })
-                    .collect();
+    //        if let Some(headers) = godot_unwrap!(headers) {
+    //            let headers: Vec<(&str, &str)> = headers
+    //                .iter()
+    //                .map(|(str1, str2)| -> (&str, &str) { (str1, str2) })
+    //                .collect();
 
-                algod = Algod::with_headers(&self.url, headers).unwrap();
+    //            algod = Algod::with_headers(&self.url, headers).unwrap();
 
-                self.algod = Rc::new(algod);
-            }
-        } else {
-            algod = Algod::new(&self.url, &self.token).unwrap();
-            self.algod = Rc::new(algod);
-        }
-    }
-
-    #[method]
-    fn generate_key(&self, #[base] _base: &Node) -> (String, String) {
+    //            self.algod = Rc::new(algod);
+    //        }
+    //    } else {
+    //        algod = Algod::new(&self.url, &self.token).unwrap();
+    //        self.algod = Rc::new(algod);
+    //    }
+    //}
+    /*
+    #[func]
+    fn generate_key(&self) -> (String, String) {
         let acc = Account::generate();
         (acc.address().to_string(), acc.mnemonic())
     }
 
-    #[method]
+    #[func]
     fn get_address(&self, #[base] _base: &Node, mnemonic: Account) -> Address {
         mnemonic.address().into()
     }
 
-    #[method]
+    #[func]
     fn sign_transaction(
         &self,
-        #[base] _base: &Node,
+        //#[base] _base: &Node,
         txn: Transaction,
         signer: Account,
     ) -> Option<SignedTransaction> {
@@ -189,7 +201,7 @@ impl Algodot {
         godot_unwrap!(stxn).map(SignedTransaction::from)
     }
 
-    #[method]
+    #[func]
     fn construct_payment(
         &self,
         #[base] _base: &Node,
@@ -207,7 +219,7 @@ impl Algodot {
         .into()
     }
 
-    #[method]
+    #[func]
     #[allow(clippy::too_many_arguments)]
     fn construct_asset_xfer(
         &self,
@@ -234,7 +246,7 @@ impl Algodot {
         .into()
     }
 
-    #[method]
+    #[func]
     #[allow(clippy::too_many_arguments)]
     fn construct_asset_create(
         &self,
@@ -280,7 +292,7 @@ impl Algodot {
         .into()
     }
 
-    #[method]
+    #[func]
     #[allow(clippy::too_many_arguments)]
     fn construct_app_call(
         &self,
@@ -396,7 +408,7 @@ impl Algodot {
         dict.into()
     }
 
-    #[method]
+    #[func]
     fn construct_asset_opt_in(
         &self,
         #[base] _base: &Node,
@@ -416,7 +428,7 @@ impl Algodot {
         .into() //uses Core Traits
     }
 
-    #[method]
+    #[func]
     /// Give transactions same group id
     fn group_transactions(
         &self,
@@ -428,96 +440,100 @@ impl Algodot {
         let result = TxGroup::assign_group_id(txns_mut_refs.as_mut_slice());
         godot_unwrap!(result).map(|_| txns)
     }
+    */
 }
 
 /*ASync Methods*/
+// Uses macros/lib.rs for implementation
+// temporarily depreciated for debugging
 /* Impelements Async Methods using Algodot Macros, Handles Error and maps the results to algod and node objects*/
-asyncmethods!(algod, node, this,
-    fn health(_ctx, _args) {
-        async move {
-            let status = algod.health().await;
+//asyncmethods!(algod, node, this,
+//    fn health(_ctx, _args) {
+//        async move {
+//            let status = algod.health().await;
+//
+//            match status {
+//                Ok(_) => 0.to_variant(), // OK
+//                Err(_) => 1.to_variant(), // FAILED
+//            }
+//        }
+//    }
 
-            match status {
-                Ok(_) => 0.to_variant(), // OK
-                Err(_) => 1.to_variant(), // FAILED
-            }
-        }
-    }
-
-    fn suggested_transaction_params(_ctx, _args) {
-        async move {
-            let params = algod.suggested_transaction_params().await.map(SuggestedTransactionParams::from);
-            godot_unwrap!(params).to_variant()
-        }
-    }
+//    fn suggested_transaction_params(_ctx, _args) {
+//        async move {
+//let params = algod.suggested_transaction_params().await.map(SuggestedTransactionParams::from);
+//godot_unwrap!(params).to_variant()
+//            todo!()
+//        }
+//    }
+/*
+fn execute (_ctx, _args){
     /*
-    fn execute (_ctx, _args){
-        /*
-        async move {
-            atc.execute(algod);//.await.expect("Error");
-        }; */
-        //todo!()
-    }
-    */
-    fn status(_ctx, _args) {
-        async move {
-            let status = algod.status().await;
-            godot_unwrap!(status).map(|status| to_json_dict(&status)).to_variant()
-        }
-    }
+    async move {
+        atc.execute(algod);//.await.expect("Error");
+    }; */
+    //todo!()
+}
+*/
+//    fn status(_ctx, _args) {
+//        async move {
+//            let status = algod.status().await;
+//            godot_unwrap!(status).map(|status| to_json_dict(&status)).to_variant()
+//        }
+//    }
 
-    fn account_information(_ctx, args) {
-        let address = args.read::<Address>().get().unwrap();
-        async move {
-            let info = algod.account_information(&address).await;
-            godot_unwrap!(info).map(|info| to_json_dict(&info)).to_variant()
-        }
-    }
+//   fn account_information(_ctx, args) {
+//       let address = args.read::<Address>().get().unwrap();
+//       async move {
+//           let info = algod.account_information(&address).await;
+//           godot_unwrap!(info).map(|info| to_json_dict(&info)).to_variant()
+//      }
+//  }
 
-    fn transaction_information(_ctx, args) {
-        let txid = args.read::<String>().get().unwrap();
+//    fn transaction_information(_ctx, args) {
+//        let txid = args.read::<String>().get().unwrap();
 
-        async move {
-            let info = algod.pending_transaction_with_id(txid.as_ref()).await;
-            godot_unwrap!(info).map(|info| to_json_dict(&info)).to_variant()
-        }
-    }
+//        async move {
+//            let info = algod.pending_transaction_with_id(txid.as_ref()).await;
+//            godot_unwrap!(info).map(|info| to_json_dict(&info)).to_variant()
+//        }
+//    }
 
-    fn send_transaction(_ctx, args) {
-        let txn = args.read::<SignedTransaction>().get().unwrap();
+//    fn send_transaction(_ctx, args) {
+//        let txn = args.read::<SignedTransaction>().get().unwrap();
 
-        async move {
-            let txid = algod.broadcast_signed_transaction(&txn).await;
-            godot_unwrap!(txid).map(|txid| txid.tx_id).to_variant()
-        }
-    }
+//        async move {
+//            let txid = algod.broadcast_signed_transaction(&txn).await;
+//            godot_unwrap!(txid).map(|txid| txid.tx_id).to_variant()
+//        }
+//    }
 
-    fn wait_for_transaction(_ctx, args) {
-        let tx_id = args.read::<String>().get().unwrap();
+//   fn wait_for_transaction(_ctx, args) {
+//       let tx_id = args.read::<String>().get().unwrap();
 
-        async move {
-            let pending_tx = Algodot::wait_for_transaction(algod, TransactionResponse { tx_id }).await;
-            godot_unwrap!(pending_tx).map(|tx| to_json_dict(&tx)).to_variant()
-        }
-    }
+//        async move {
+//            let pending_tx = Algodot::wait_for_transaction(algod, TransactionResponse { tx_id }).await;
+//            godot_unwrap!(pending_tx).map(|tx| to_json_dict(&tx)).to_variant()
+//        }
+//    }
 
-    fn send_transactions(_ctx, args) {
-        let vartxns = args.read::<Vec<SignedTransaction>>().get().unwrap();
-        let txns: Vec<algonaut::transaction::SignedTransaction> = vartxns.iter().map(|tx| tx.0.clone()).collect();
+//    fn send_transactions(_ctx, args) {
+//        let vartxns = args.read::<Vec<SignedTransaction>>().get().unwrap();
+//        let txns: Vec<algonaut::transaction::SignedTransaction> = vartxns.iter().map(|tx| tx.0.clone()).collect();
 
-        async move {
-            let txid = algod.broadcast_signed_transactions(txns.as_slice()).await;
-            godot_unwrap!(txid).map(|txid| to_json_dict(&txid)).to_variant()
-        }
-    }
+//        async move {
+//            let txid = algod.broadcast_signed_transactions(txns.as_slice()).await;
+//            godot_unwrap!(txid).map(|txid| to_json_dict(&txid)).to_variant()
+//        }
+//    }
 
-    fn compile_teal(_ctx, args) {
-        let source_code = args.read::<String>().get().unwrap();
+//    fn compile_teal(_ctx, args) {
+//        let source_code = args.read::<String>().get().unwrap();
+//
+//        async move {
+//            let compiled = algod.compile_teal(source_code.as_bytes()).await;
+//            godot_unwrap!(compiled).map(|c| (c.hash().0.to_vec().to_variant(), c.bytes_to_sign().to_variant())).to_variant()
+//        }
+//    }
 
-        async move {
-            let compiled = algod.compile_teal(source_code.as_bytes()).await;
-            godot_unwrap!(compiled).map(|c| (c.hash().0.to_vec().to_variant(), c.bytes_to_sign().to_variant())).to_variant()
-        }
-    }
-
-);
+//);
