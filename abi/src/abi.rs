@@ -82,6 +82,7 @@ pub mod atc {
         }
     }
 
+    #[allow(dead_code)]
     pub trait Into {
         type Into;
         type From;
@@ -125,7 +126,7 @@ pub mod params {
     use algonaut::core::SuggestedTransactionParams;
     use algonaut::model::algod::v2::TransactionParams;
 
-    pub struct MySuggestedTransactionParams(SuggestedTransactionParams);
+    pub struct MySuggestedTransactionParams(());
 
     pub trait Into {
         fn _app_id(&self, x: u64) -> u64;
@@ -197,6 +198,7 @@ pub mod escrow {
         pub method_results: Vec<AbiMethodResult>,
     }
 
+    #[allow(dead_code)]
     trait MyTrait {
         type Foo<'a>;
         type Params;
