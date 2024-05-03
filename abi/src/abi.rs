@@ -1,9 +1,21 @@
 //code reference: https://github.com/manuelmauro/algonaut/blob/main/tests/step_defs/integration/abi.rs
-
+/*
+TO DO:
+(1)Implement To and from variants for Suggested Transaction Parameters  for dictionaries from Algodot core
+(2) Rename Structs to be name appropriate
+(3) Imlement Box Storage
+(4) Impl serder json fron algonaut
+*/
 pub mod abi_smartcontract {
 
+    /*
+    Custom Logic For My Escrow Smart COntract using abi methods
+    Temporarily disabled for refactoring
+
+    */
+
     use algonaut::abi::abi_interactions::AbiMethod;
-    use algonaut::abi::abi_type::AbiType;
+    //use algonaut::abi::abi_type::AbiType;
     use gdnative::core_types::Variant;
     use gdnative::prelude::ToVariant;
 
@@ -19,39 +31,7 @@ pub mod abi_smartcontract {
             todo!()
         }
     }
-
-    impl MyTrait for Foo {
-        type Foo = Foo;
-        type Type = String;
-        type Parsed = Option<String>;
-
-        fn new() -> Self::Foo {
-            Foo {
-                name: "".to_string(),
-                description: "".to_string(),
-                type_: "".to_string(),
-                parsed: None,
-            }
-        }
-
-        fn r#type() -> String {
-            "".to_string()
-        }
-        fn parsed() -> Option<AbiType> {
-            None
-        }
-    }
-
-    trait MyTrait {
-        type Foo;
-        type Type: ToString;
-        type Parsed;
-
-        fn new() -> Self::Foo;
-        fn r#type() -> String;
-        fn parsed() -> Option<AbiType>;
-    }
-
+    // rename from foo
     impl Foo {
         //Doc : https://developer.algorand.org/docs/get-details/transactions/signatures/#single-signatures
         //      https://developer.algorand.org/docs/get-details/dapps/smart-contracts/ABI/?from_query=Method%20Signature#reference-types
@@ -89,7 +69,7 @@ pub mod atc {
         Submitted,
         Committed,
     }
-
+    // rewrite to parse to godot debugger
     impl std::fmt::Display for AtomicTransactionComposerStatus {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             match self {
@@ -134,6 +114,9 @@ pub mod params {
     /*
         Temporary Fix for Params Error Between algodot_core and algonaut suggested
         transaction parameters
+
+        TO DO :
+        (1) Depreciate this codebase and implement godot dictionary trait from algodot code my suggested transactions impl
 
     */
 
@@ -273,30 +256,6 @@ pub mod escrow {
     /* Smart Contract Arc 4 Implementation*/
 
     impl Foo<'_> {
-        /*
-        // Adding method to create application call
-        fn get_call(&self) -> Result<ApplicationCallOnComplete, ServiceError> {
-
-            todo!()
-
-        }
-
-        */
-
-        /*
-
-        // Adding method to create pay transaction
-        fn get_payment(&self) -> Result<Payment, ServiceError> {
-            todo!()
-        }
-
-        fn arg1(&self)-> AbiArgValue{
-            todo!()
-
-        }
-
-        */
-
         pub fn note(size: u32) -> Option<Vec<u8>> {
             Some(vec![size.try_into().unwrap()])
         }
@@ -335,50 +294,6 @@ pub mod escrow {
         pub fn app_address(app_id: &u64) -> Address {
             to_app_address(*app_id)
         }
-
-        /*
-
-        pub fn deposit(_algod : Algod , acct1_3 : Account ,  params : algonaut::core::SuggestedTransactionParams) -> algonaut::core::SuggestedTransactionParams {
-            /*
-            Deposit Method Parameters for Escrow SmartContract
-            Unused and Depreciated
-
-            Does
-            */
-
-            //App ID
-            let _app_id = 161737986;
-
-
-            //Get Escrow Address From App ID
-
-            let _escrow_address = Foo::app_address(&_app_id); //to_app_address(_app_id.clone());
-
-            println!(" building Pay transaction to Escrow Address: {}", &_escrow_address);
-
-            let _t = Foo::pay(_escrow_address, acct1_3.clone(), params.clone());
-
-            // create a transaction with signer with the current transaction
-
-            let _signer = TransactionSigner::BasicAccount(acct1_3);
-
-
-            let tx_with_signer = TransactionWithSigner { tx: _t, signer: _signer };
-
-
-            let mut atc = AtomicTransactionComposer::default();
-
-            // Deposit
-            // Add Payment Txn to
-            // Should Ideally Match To A Statemachine Behaviour Bloc
-            atc.add_transaction(tx_with_signer).unwrap();
-
-            params
-
-
-        }
-
-        */
         pub fn new_atc() -> AtomicTransactionComposer {
             /*
             Constructs a Default Atomic Transation Composer
@@ -422,33 +337,5 @@ pub mod escrow {
         pub fn fee(amount: u64) -> TxnFee {
             Fixed(MicroAlgos(amount))
         }
-        /*
-        pub fn construct_app_call_method(
-            /*
-            Constructs an App Call Method as a Rust Module
-
-            */
-            &self,
-            _app_id: u64,
-            _method: AbiMethod,
-            _method_args: Vec<AbiArgValue>,
-            _fee: TxnFee, //make customizable
-            _sender: Address,
-            _on_complete: ApplicationCallOnComplete,
-            _clear_program: Option<CompiledTeal>,
-            _global_schema: Option<StateSchema>,
-            _local_schema: Option<StateSchema>,
-            _extra_pages: u32,
-            _note: Option<Vec<u8>>,
-            _lease: Option<HashDigest>,
-            _rekey_to: Option<Address>,
-            _signer: TransactionSigner,
-        ) -> Result<Foo<'_>, ServiceError> {
-            todo!()
-             */
     }
-
-    /* Executes the Atomic Transaction Compoer in Async*/
-
-    /* Implement To and From Variable with Dictionary Types*/
 }

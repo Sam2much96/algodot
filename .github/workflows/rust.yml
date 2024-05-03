@@ -5,15 +5,14 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ Godot-3.5-DEV ]
+
 
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
 
-  GODOT_VER: "3.4"
+  GODOT_VER: "3.5"
   GODOT_REL: stable
 
   SANDBOX_CONFIG: ./test/sandbox/config.test

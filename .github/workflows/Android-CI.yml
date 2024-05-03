@@ -1,10 +1,11 @@
 name: Android CI
 
 on:
-  push:
-    branches: [ TESTNET ]
-  pull_request:
-    branches: [ TESTNET ]
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # DOcumentation : https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+    - cron:  '30 5,17 * * *'
+  
     
 env:
   CARGO_TERM_COLOR: always
