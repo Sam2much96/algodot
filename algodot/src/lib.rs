@@ -32,7 +32,7 @@ impl futures::task::LocalSpawn for SharedLocalPool {
 /* Using Async Cookbook Recipie to handle Async Tasks using Threads*/
 
 #[derive(GodotClass)]
-#[class(base=Node)]
+#[class(no_init,base=Node)]
 struct AsyncExecutorDriver {
     runtime: Runtime,
 }

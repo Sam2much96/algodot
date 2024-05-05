@@ -16,7 +16,7 @@ pub mod abi_smartcontract {
     use algonaut::abi::abi_interactions::AbiMethod;
     use algonaut::abi::abi_type::AbiType;
     use godot::builtin::Variant;
-    use godot::prelude::ToVariant;
+    //use godot::prelude::ToVariant;
 
     pub struct Foo {
         pub name: String,
@@ -25,11 +25,11 @@ pub mod abi_smartcontract {
         pub parsed: Option<String>,
     }
 
-    impl ToVariant for Foo {
-        fn to_variant(&self) -> Variant {
-            todo!()
-        }
-    }
+    //impl Variant for Foo {
+    //    fn to_variant(&self) -> Variant {
+    //        todo!()
+    //    }
+    //}
 
     impl MyTrait for Foo {
         type Foo = Foo;

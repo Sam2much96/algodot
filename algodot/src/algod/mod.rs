@@ -8,7 +8,7 @@ use algodot_macros::*;
 
 use algonaut::algod::v2::Algod;
 //use algonaut::core::{Address as OtherAddress, MicroAlgos, Round};
-//use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
+use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
 //use algonaut::transaction::transaction::{
 //    ApplicationCallOnComplete::NoOp, AssetAcceptTransaction, AssetConfigurationTransaction,
 //    AssetParams, AssetTransferTransaction,
@@ -17,7 +17,7 @@ use algonaut::algod::v2::Algod;
 //use algonaut::transaction::{
 //    account::Account as OtherAccount, builder::CallApplication, Pay, TransactionType, TxnBuilder,
 //};
-// Gdnative is depreciated in godot 4.0 using gdext instead
+// Gdnative is depreciated in godot 4.0 using gdext instead with tokio macros until Asyn is implemented in GExt
 //use gdnative::tasks::{Async, AsyncMethod, Spawner};
 use godot::builtin::*;
 use godot::engine::Engine;
@@ -29,7 +29,7 @@ use std::rc::Rc; //used for reference counting
 //use paste::*;
 
 #[derive(GodotClass, Clone)]
-#[class(base=Node)]
+#[class(no_init,base=Node)]
 //#[register_with(Self::register)] //depreciated macro
 
 // disabled for refactoring
@@ -88,28 +88,35 @@ impl Algodot {
     /* */
 
     /* */
-    //async fn wait_for_transaction(
-    //    algod: Rc<Algod>,
-    //    tx: TransactionResponse,
-    //) -> Result<PendingTransaction, AlgodotError> {
-    //    let status = algod.status().await?;
-    //    let mut round = status.last_round - 1;
-    //    loop {
-    //        algod.status_after_round(Round(round)).await?;
-    //        let txn = algod.pending_transaction_with_id(&tx.tx_id).await?;
-    //        if let Some(confirmed_round) = txn.confirmed_round {
-    //            if confirmed_round != 0 {
-    //                return Ok(txn);
-    //            }
-    //        } else if !txn.pool_error.is_empty() {
-    //            return Err(AlgodotError::PoolError(txn.pool_error));
-    //        }
-    //        round += 1;
-    //   }
-    //}
+
+    //#[method(async)]
+
+    /* Should unwrap a tokio async to a Godot Dictionary */
+    /* SHould return an Error */
+    #[tokio::main]
+    async fn wait_for_transaction(
+        algod: Rc<Algod>,
+        tx: TransactionResponse,
+    ) -> Result<PendingTransaction, _> {
+        //AlgodotError> {
+        let status = algod.status().await?;
+        let mut round = status.last_round - 1;
+        loop {
+            // temporarily disabled//algod.status_after_round(Round(round)).await?;
+            let txn = algod.pending_transaction_with_id(&tx.tx_id).await?;
+            if let Some(confirmed_round) = txn.confirmed_round {
+                if confirmed_round != 0 {
+                    return Ok(txn);
+                }
+            } else if !txn.pool_error.is_empty() {
+                return todo!(); //Err(AlgodotError::PoolError(txn.pool_error));
+            }
+            round += 1;
+        }
+    }
 }
 
-#[godot_api] //#[methods]
+//#[godot_api] //#[methods]
 impl Algodot {
     // Temporarily disabing for debugging
     //#[func]

@@ -9,7 +9,8 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-tokio = { version = "1.10", features = ["rt"] }
+tokio = { version = "1.37", features = ["full"] }
+tokio-macros = { version = "0.2.0-alpha.6" }
 godot = { git = "https://github.com/godot-rust/gdext", default-features = true, branch = "master" }
 futures = "0.3"
 algonaut = { git = "https://github.com/manuelmauro/algonaut", rev = "75bce54" }
