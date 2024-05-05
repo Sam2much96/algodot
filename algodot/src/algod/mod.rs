@@ -7,8 +7,11 @@ use algodot_macros::*;
 // All Algonaut Classes should be exposed in their sub modules, sharing only core algorand scripts required for txn signing
 
 use algonaut::algod::v2::Algod;
+use algonaut::error::ServiceError;
+
 //use algonaut::core::{Address as OtherAddress, MicroAlgos, Round};
 use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
+
 //use algonaut::transaction::transaction::{
 //    ApplicationCallOnComplete::NoOp, AssetAcceptTransaction, AssetConfigurationTransaction,
 //    AssetParams, AssetTransferTransaction,
@@ -93,11 +96,12 @@ impl Algodot {
 
     /* Should unwrap a tokio async to a Godot Dictionary */
     /* SHould return an Error */
+    // Documentation : https://docs.rs/algonaut/latest/algonaut/algod/v2/struct.Algod.html
     #[tokio::main]
     async fn wait_for_transaction(
         algod: Rc<Algod>,
         tx: TransactionResponse,
-    ) -> Result<PendingTransaction, _> {
+    ) -> Result<PendingTransaction, ServiceError> {
         //AlgodotError> {
         let status = algod.status().await?;
         let mut round = status.last_round - 1;
