@@ -1,8 +1,8 @@
 //use algodot_abi::abi_smartcontract::*;
-use algodot_abi::abi_smartcontract::Foo as abiFoo;
-use algodot_abi::escrow::Foo as escrowFoo;
-use algodot_core::*; //temprarily disabled for refactoring
-use algodot_macros::*;
+//use algodot_abi::abi_smartcontract::Foo as abiFoo;
+//use algodot_abi::escrow::Foo as escrowFoo;
+//use algodot_core::*; //temprarily disabled for refactoring
+//use algodot_macros::*;
 
 // All Algonaut Classes should be exposed in their sub modules, sharing only core algorand scripts required for txn signing
 
@@ -22,8 +22,9 @@ use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
 //};
 // Gdnative is depreciated in godot 4.0 using gdext instead with tokio macros until Asyn is implemented in GExt
 //use gdnative::tasks::{Async, AsyncMethod, Spawner};
+use godot::builtin::meta::{ConvertError, FromGodot, GodotConvert, GodotType, ToGodot};
 use godot::builtin::*;
-use godot::engine::Engine;
+//use godot::engine::Engine;
 use godot::prelude::*;
 
 use std::rc::Rc; //used for reference counting
@@ -31,14 +32,14 @@ use std::rc::Rc; //used for reference counting
 //use algonaut::atomic_transaction_composer::{AddMethodCallParams, ExecuteResult};
 //use paste::*;
 
-#[derive(GodotClass, Clone)]
+#[derive(GodotClass, Clone, Debug)]
 #[class(no_init,base=Node)]
 //#[register_with(Self::register)] //depreciated macro
 
 // disabled for refactoring
 pub struct Algodot {
     //    //property macro?
-    //    #[property(set = "Self::set_url")]
+    //#[property(set = "Self::set_url")]
     url: String,
     //
     //    #[property(set = "Self::set_token")]
@@ -50,7 +51,44 @@ pub struct Algodot {
     algod: Rc<Algod>,
 }
 
+// required traits From Godot and To Godot
+/* Should unwrap algod node to a Godot Dictionary */
+// try using algfonaut serder_json
+
+impl GodotConvert for Algodot {
+    type Via = Dictionary;
+}
+
+impl FromGodot for Algodot {
+    fn from_godot(via: Self::Via) -> Self {
+        todo!()
+    }
+
+    fn from_variant(variant: &Variant) -> Self {
+        todo!()
+    }
+    fn try_from_godot(via: Self::Via) -> Result<Self, ConvertError> {
+        todo!()
+    }
+}
+
+impl ToGodot for Algodot {
+    fn into_godot(self) -> Self::Via {
+        todo!()
+    }
+
+    fn to_variant(&self) -> Variant {
+        todo!()
+    }
+
+    fn to_godot(&self) -> Self::Via {
+        todo!()
+    }
+}
+
+#[godot_api]
 impl Algodot {
+    #[func]
     fn new(_base: &Node) -> Self {
         Algodot {
             url: String::new(),
