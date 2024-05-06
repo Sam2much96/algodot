@@ -25,8 +25,8 @@ use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
 use godot::builtin::meta::{ConvertError, FromGodot, GodotConvert, GodotType, ToGodot};
 use godot::builtin::*;
 //use godot::engine::Engine;
+use godot::prelude::Node;
 use godot::prelude::*;
-
 use std::rc::Rc; //used for reference counting
 
 //use algonaut::atomic_transaction_composer::{AddMethodCallParams, ExecuteResult};
@@ -74,7 +74,8 @@ impl FromGodot for Algodot {
 
 impl ToGodot for Algodot {
     fn into_godot(self) -> Self::Via {
-        todo!()
+        let t = Dictionary::new();
+        return t;
     }
 
     fn to_variant(&self) -> Variant {
@@ -83,6 +84,39 @@ impl ToGodot for Algodot {
 
     fn to_godot(&self) -> Self::Via {
         todo!()
+    }
+}
+
+impl ToGodot for &Node {
+    fn to_variant(&self) -> Variant {
+        todo!()
+    }
+
+    fn to_godot(&self) -> Self::Via {
+        todo!()
+    }
+}
+
+impl GodotConvert for &Node {
+    type Via = Dictionary;
+
+    //fn to_variant() -> Variant {
+    //    todo!()
+    //}
+
+    //fn to_godot(&self) -> Self::Via {
+    //    let t = Dictionary::new();
+    //    return t;
+    //}
+}
+
+impl FromGodot for &Node {
+    fn from_variant(variant: &Variant) -> &Node {
+        todo!()
+    }
+
+    fn try_from_godot<T>() -> Result<T, ConvertError> {
+        return Result<T, ConvertError>;
     }
 }
 
