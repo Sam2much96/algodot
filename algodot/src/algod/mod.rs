@@ -100,14 +100,6 @@ impl ToGodot for &Node {
 impl GodotConvert for &Node {
     type Via = Dictionary;
 
-    //fn to_variant() -> Variant {
-    //    todo!()
-    //}
-
-    //fn to_godot(&self) -> Self::Via {
-    //    let t = Dictionary::new();
-    //    return t;
-    //}
 }
 
 impl FromGodot for &Node {
