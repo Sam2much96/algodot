@@ -88,7 +88,7 @@ pub mod atc {
         type From;
         type T;
 
-        fn into<T: From<Self::T> + ?Sized>(_b: &T) {
+        fn into<T: From<Self::T>>(_b: &T) {
             todo!()
         }
 
