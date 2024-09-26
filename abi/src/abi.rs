@@ -15,7 +15,7 @@ pub mod abi_smartcontract {
 
     use algonaut::abi::abi_interactions::AbiMethod;
     use algonaut::abi::abi_type::AbiType;
-    use godot::builtin::Variant;
+    //use godot::builtin::Variant;
     //use godot::prelude::ToVariant;
 
     pub struct Foo {
