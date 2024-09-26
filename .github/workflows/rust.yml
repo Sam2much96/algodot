@@ -1,4 +1,4 @@
-name: CI
+name: Rust CI
 
 # Continuous Integration w/ Godot Engine and private Algorand Network.
 # Godot CI inspired by: https://github.com/godot-rust/godot-rust/tree/master/.github/workflows
@@ -163,7 +163,7 @@ jobs:
       - name: Build Algodot
         run: cargo build
         
-      - name: Run Godot integration tests
+      - name: Run Godot integration tests [Buggy]
         run: |
           cd test;
           mkdir -p ./project/addons/algodot/lib;
