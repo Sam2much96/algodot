@@ -47,9 +47,9 @@ jobs:
           
           #Modify Cargo.toml for WASM
 
-          sed -i '/^\[workspace\]$/ {
-          r /dev/stdin
-          d
+          sed -i '/^\[workspace\]/,/\]/ {
+              r /dev/stdin
+              d
           }' Cargo.toml << 'EOF'
           [package]
           name = "Algodot"
@@ -73,6 +73,7 @@ jobs:
               "macros"
           ]
           EOF
+
 
           # Check Toml file
           cat Cargo.toml && cd 
