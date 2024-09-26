@@ -44,11 +44,38 @@ jobs:
 
         run: |
           cd /home/runner/work/algodot/algodot
-          # To do: Modify Cargo.toml for WASM
           
-          #sed -i '/members = \[/,+2d' Cargo.toml       
-          #sed -i '1s/\[workspace\].*/[package]\nname = "Algodot"\nversion = "0.2.0"\nedition = "2018"\n\n[lib]\ncrate-type = ["cdylib"]\npath = "algodot\/src\/algod\/mod.rs"\n\n[dependencies]\nalgonaut = { git = "https:\/\/github.com\/manuelmauro\/algonaut", rev = "75bce54" }\nalgodot_abi = { path = "abi" }\nalgodot_core = { path = "core" }\nalgodot_macros = { path = "macros" }\ngdnative = { version = "0.11", features = ["async"] }\n\n[workspace]\n\nmembers = [\n    "algodot",\n    "macros"\n]/' Cargo.toml
-          #cat Cargo.toml && cd 
+          #Modify Cargo.toml for WASM
+
+          sed -i '/^\[workspace\]$/ {
+          r /dev/stdin
+          d
+          }' Cargo.toml << 'EOF'
+          [package]
+          name = "Algodot"
+          version = "0.2.0"
+          edition = "2018"
+          
+          [lib]
+          crate-type = ["cdylib"]
+          path = "algodot/src/algod/mod.rs"
+          
+          [dependencies]
+          algonaut = { git = "https://github.com/manuelmauro/algonaut", rev = "75bce54" }
+          algodot_abi = { path = "abi" }
+          algodot_core = { path = "core" }
+          algodot_macros = { path = "macros" }
+          gdnative = { version = "0.11", features = ["async"] }
+          
+          [workspace]
+          members = [
+              "algodot",
+              "macros"
+          ]
+          EOF
+
+          # Check Toml file
+          cat Cargo.toml && cd 
           sudo apt-get update -y
           sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross
           
