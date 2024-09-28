@@ -54,7 +54,7 @@ jobs:
           [package]
           name = "Algodot"
           version = "0.2.0"
-          edition = "2018"
+          edition = "2021"
           
           [lib]
           crate-type = ["cdylib"]
@@ -83,14 +83,11 @@ jobs:
        # `cargo check` command here will use installed `nightly`
       # as it is set as an "override" for current directory
 
-      - name: Run cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
+      #- name: Run cargo check
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: check
           
-
-
-      
       - name: "Compile & install Openssl 1.1l"
         run: |
           sudo apt install make gcc -y
@@ -109,15 +106,15 @@ jobs:
            cargo install wasm-pack
            
            
-      - name: "Copy Header Files"
-        run: |
+      #- name: "Copy Header Files"
+      #  run: |
           # Linux C Header Boilerplate Code
            
-           cp /usr/include/wchar.h ${GDNATIVE}     
-           cp -R /usr/include/x86_64-linux-gnu/bits ${GDNATIVE}
-           cp /usr/include/features.h ${GDNATIVE}/bits
-           cp /usr/include/features-time64.h ${GDNATIVE}/bits
-           cp /usr/include/x86_64-linux-gnu/bits/wordsize.h ${GDNATIVE}/bits
+      #     cp /usr/include/wchar.h ${GDNATIVE}     
+      #     cp -R /usr/include/x86_64-linux-gnu/bits ${GDNATIVE}
+      #     cp /usr/include/features.h ${GDNATIVE}/bits
+      #     cp /usr/include/features-time64.h ${GDNATIVE}/bits
+      #     cp /usr/include/x86_64-linux-gnu/bits/wordsize.h ${GDNATIVE}/bits
            
       - name: "WASM compile"
         run: |
@@ -127,7 +124,7 @@ jobs:
            export OPENSSL_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            
-           export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
+           #export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export C_INCLUDE_PATH=${{ github.workspace }}/usr/include
           
            #RUST_BACKTRSCE=full cargo build --target wasm32-unknown-emscripten  --release
