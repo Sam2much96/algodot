@@ -75,7 +75,7 @@ jobs:
           path = "algodot/src/algod/mod.rs"
           
           [dependencies]
-          algonaut = { git = "https://github.com/manuelmauro/algonaut", version = "0.4.2" }
+          algonaut = { git = "https://github.com/manuelmauro/algonaut", rev = "8b41708" }
           algodot_abi = { path = "abi" }
           algodot_core = { path = "core" }
           algodot_macros = { path = "macros" }
@@ -123,8 +123,8 @@ jobs:
           # Downgrade Bumpalo Module for cargo build for Nightly Compile
           # cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
-          # Upgrade Ring Module for Cargo Build from 0.16.19 to 0.16.20
-          # cargo update -p ring --precise 0.16.20
+          # Upgrade Ring Module to 0.17.5 for bleeding edge wasm compiles
+          # cargo update -p ring --precise 0.17.5
 
           # Downgrading Ahash Module to Remove an unstable feature from the nightly build toolchain causing an error
           # cargo update -p ahash --precise 0.8.9
