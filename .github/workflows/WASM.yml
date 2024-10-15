@@ -4,6 +4,9 @@
 # TO DO:
 # (1) 
 #
+# Bugs
+# (1) Wasm Emscripten is not supported for ring which is a dependency of algonaut_core. Ring only barely supports Wasm-unknown-unknown. But unknown unknow doesn't provide emscripten c libraries for compiler
+#
 # IDEAS:
 # (1) Custom Algonaut fork that uses appropriate dependencies
 # (2) Building to Wasm Unknown Unknown produces the same error as wasm pack compile. Conside Adding Emscripten to Wasm Pack Compile Command
