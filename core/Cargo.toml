@@ -6,8 +6,8 @@ edition = "2021"
 [dependencies]
 gdnative = { version = "0.11", features = ["async"] }
 algonaut = { git = "https://github.com/manuelmauro/algonaut", rev = "8b41708" }
-algonaut_model = "0.4.2"
-algonaut_transaction = "0.4.2"
+algonaut_model =  { git = "https://github.com/manuelmauro/algonaut", rev = "8b41708" }
+algonaut_transaction =  { git = "https://github.com/manuelmauro/algonaut", rev = "8b41708" }
 num-bigint = {git = "https://github.com/rust-num/num-bigint", version = "0.4"}
 derive_more = "0.99.16"
 serde = "1.0"
