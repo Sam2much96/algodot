@@ -144,7 +144,8 @@ jobs:
            #export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export C_INCLUDE_PATH=$EMSDK/upstream/emscripten/cache/sysroot/include
           
-           #RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-emscripten --release
-           CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" wasm-pack test --firefox
+           RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-emscripten --release
+           # error : c_uint, c_int, and c_void cannot be found in the libc crate
+           #CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" wasm-pack test --firefox
           
     
