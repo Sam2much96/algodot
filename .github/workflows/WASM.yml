@@ -173,7 +173,7 @@ jobs:
            #RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
            
            # Build Command To Wasm
-           #RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
+           RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
 
            # Compile and Build
-           CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack build --target no-modules
+           #CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack build --target no-modules
