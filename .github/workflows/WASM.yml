@@ -65,7 +65,7 @@ jobs:
           algodot_abi = { path = "abi" }
           algodot_core = { path = "core" }
           algodot_macros = { path = "macros" }
-          gdnative = { version = "0.10", features = ["async"] }
+          gdnative = { version = "0.11", features = ["async"] }
           
           [workspace]
           members = [
@@ -110,7 +110,7 @@ jobs:
           cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
           # Downgrading Ahash Module to Remove an unstable feature from the nightly build toolchain causing an error
-          cargo update -p ahash --precise 0.7.8
+          cargo update -p ahash --precise 0.8.8
           
           # Install Compatible Wasm Pack for Web Assemble Compile
           cargo +nightly-2023-01-27 install --locked wasm-pack --version 0.11.1
