@@ -35,7 +35,7 @@ jobs:
       - name: Install specific nightly for wasm builds
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: nightly-2023-01-27
+            toolchain: stable
             override: true
             components: rustfmt, clippy
             target: wasm32-unknown-unknown
@@ -107,16 +107,14 @@ jobs:
           # Setup Other Compile Dependencies For nightly 1.69
              
           # Downgrade Bumpalo Module for cargo build for Nightly Compile
-          cargo update -p bumpalo@3.16.0 --precise 3.14.0
+          # cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
           # Upgrade Ring Module for Cargo Build from 0.16.19 to 0.16.20
-          cargo update -p ring --precise 0.16.20
+          # cargo update -p ring --precise 0.16.20
 
           # Downgrading Ahash Module to Remove an unstable feature from the nightly build toolchain causing an error
-          cargo update -p ahash --precise 0.8.9
+          # cargo update -p ahash --precise 0.8.9
           
-          # Depreciated Install Compatible Wasm Pack for Web Assemble Compile
-          # cargo +nightly-2023-01-27 install --locked wasm-pack --version 0.11.1
 
           # Get the emsdk repo
           git clone https://github.com/emscripten-core/emsdk.git
@@ -147,8 +145,5 @@ jobs:
            #export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export C_INCLUDE_PATH=$EMSDK/upstream/emscripten/cache/sysroot/include
           
-           RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown --release
-           # error : c_uint, c_int, and c_void cannot be found in the libc crate
-           #CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" wasm-pack test --firefox
-          
+           RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
     
