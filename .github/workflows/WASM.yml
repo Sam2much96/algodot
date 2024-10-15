@@ -46,10 +46,10 @@ jobs:
       - name: Install specific nightly for wasm builds
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: ${TOOLCHAIN}
+            toolchain: nightly
             override: true
             components: rustfmt, clippy
-            target: ${TARGETS}
+            target: wasm32-unknown-emscripten
 
       - name: "Setup for WASM compile"
 
