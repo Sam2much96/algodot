@@ -32,10 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install latest nightly
+      - name: Install specific nightly for wasm builds
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: nightly
+            toolchain: nightly-2023-01-27
             override: true
             components: rustfmt, clippy
             target: wasm32-unknown-emscripten
@@ -101,34 +101,25 @@ jobs:
           
       - name: "WASM install"
         run: |
-          # Linux
+          # Linux Check Other Dependencies
           
-           cargo install wasm-pack
-           
-           
-      #- name: "Copy Header Files"
-      #  run: |
-          # Linux C Header Boilerplate Code
-           
-      #     cp /usr/include/wchar.h ${GDNATIVE}     
-      #     cp -R /usr/include/x86_64-linux-gnu/bits ${GDNATIVE}
-      #     cp /usr/include/features.h ${GDNATIVE}/bits
-      #     cp /usr/include/features-time64.h ${GDNATIVE}/bits
-      #     cp /usr/include/x86_64-linux-gnu/bits/wordsize.h ${GDNATIVE}/bits
+           rustc +nightly --version --verbose
+           emcc -v
+
            
       - name: "WASM compile"
         run: |
           # Linux
-        
+          
            export OPENSSL=${{ github.workspace }}/${OPENSSL_VERSION}
            export OPENSSL_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            
            #export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
-           export C_INCLUDE_PATH=${{ github.workspace }}/usr/include
+           export C_INCLUDE_PATH=$EMSDK/upstream/emscripten/cache/sysroot/include
           
            #RUST_BACKTRSCE=full cargo build --target wasm32-unknown-emscripten  --release
-           CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack test --firefox
+           RUST_BACKTRSCE=full cargo +nightly-2023-01-27 build --target=wasm32-unknown-emscripten --release
           
           
     
