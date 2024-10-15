@@ -106,9 +106,12 @@ jobs:
         run: |
           # Setup Other Compile Dependencies For nightly 1.69
              
-          # Downgrade Bumpalo Module for Nightly Compile
+          # Downgrade Bumpalo Module for cargo build for Nightly Compile
           cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
+          # Downgrade Clap Lex Module for Wasm Pack for Nightly Compile
+          cargo update -p clap_lex@0.7.2 --precise 0.5.0
+          
           # Install Wasm Pack for Web Assemble Compile
           cargo install wasm-pack
 
