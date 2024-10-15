@@ -43,6 +43,7 @@ jobs:
       - name: "Setup for WASM compile"
 
         run: |
+          emcc -v
           cd /home/runner/work/algodot/algodot
           
           #Modify Cargo.toml for WASM
