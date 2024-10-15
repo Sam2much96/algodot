@@ -9,7 +9,7 @@
 #
 # IDEAS:
 # (1) Custom Algonaut fork that uses appropriate dependencies
-# (2) Building to Wasm Unknown Unknown produces the same error as wasm pack compile. Conside Adding Emscripten to Wasm Pack Compile Command
+# (2) Building to Wasm Unknown Unknown produces the same error as wasm pack compile, no c modules. Conside Adding Emscripten to Wasm Pack Compile Command
 
 name: WASM CI
 
@@ -27,7 +27,7 @@ env:
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION: openssl-1.1.1l
   TOOLCHAIN: nightly
-  TARGETS: wasm-unknown-emscripten
+  TARGETS: wasm-unknown-unknown
   
   
 jobs:
@@ -52,7 +52,7 @@ jobs:
             toolchain: nightly
             override: true
             components: rustfmt, clippy
-            target: wasm32-unknown-emscripten
+            target: wasm32-unknown-unknown
 
       - name: "Setup for WASM compile"
 
@@ -162,5 +162,5 @@ jobs:
            #RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
            
            # Build Command To Wasm
-           RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten
+           RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-unknown --release
     
