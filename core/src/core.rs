@@ -3,7 +3,7 @@
 
 use algonaut::core::{MicroAlgos, Round, SuggestedTransactionParams};
 use algonaut::crypto::{HashDigest, Signature};
-use algonaut::model::algod::v2::PendingTransaction;
+use algonaut_model::algod::v2::PendingTransaction;
 use algonaut::transaction::account::Account;
 use algonaut::transaction::transaction::{
     ApplicationCallOnComplete, ApplicationCallTransaction, AssetAcceptTransaction,
@@ -12,7 +12,7 @@ use algonaut::transaction::transaction::{
 };
 
 use algonaut::transaction::{SignedTransaction, Transaction, TransactionType};
-use algonaut::{core::Address, error::ServiceError};
+use algonaut::{core::Address, AlgodotError::ServiceError};
 use derive_more::{Deref, DerefMut, From, Into};
 use gdnative::api::JSON;
 use gdnative::prelude::*;
