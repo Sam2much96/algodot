@@ -109,6 +109,9 @@ jobs:
           # Downgrade Bumpalo Module for cargo build for Nightly Compile
           cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
+          # Upgrade Ring Module for Cargo Build
+          cargo update -p ring --precise 0.17.8
+
           # Downgrading Ahash Module to Remove an unstable feature from the nightly build toolchain causing an error
           cargo update -p ahash --precise 0.8.9
           
