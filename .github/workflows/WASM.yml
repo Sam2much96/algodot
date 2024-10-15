@@ -6,7 +6,7 @@
 #
 # IDEAS:
 # (1) Custom Algonaut fork that uses appropriate dependencies
-# (2) 
+# (2) Building to Wasm Unknown Unknown produces the same error as wasm pack compile. Conside Adding Emscripten to Wasm Pack Compile Command
 
 name: WASM CI
 
