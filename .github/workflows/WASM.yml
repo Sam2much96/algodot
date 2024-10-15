@@ -66,7 +66,6 @@ jobs:
           algodot_core = { path = "core" }
           algodot_macros = { path = "macros" }
           gdnative = { version = "0.11", features = ["async"] }
-          bumpalo = "3.15.0"
           
           [workspace]
           members = [
@@ -108,6 +107,8 @@ jobs:
           # Setup Other Compile Dependencies For nightly 1.69
           
           ls -al
+          # Downgrade Bumpalo Module for Nightly Compile
+          cargo update -p bumpalo@3.16.0 --precise 3.14
 
           
            
