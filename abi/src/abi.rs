@@ -124,7 +124,7 @@ pub mod params {
     use algonaut::core::MicroAlgos;
     use algonaut::core::Round;
     use algonaut::core::SuggestedTransactionParams;
-    use algonaut::model::algod::v2::TransactionParams;
+    use algonaut_model::algod::v2::TransactionParams;
 
     pub struct MySuggestedTransactionParams(());
 
@@ -144,7 +144,7 @@ pub mod params {
         */
 
         fn to_variant(&self, params: SuggestedTransactionParams) -> TransactionParams {
-            algonaut::model::algod::v2::TransactionParams {
+            algonaut_model::algod::v2::TransactionParams {
                 consensus_version: params.consensus_version,
                 fee_per_byte: MicroAlgos(0u64),
                 genesis_hash: params.genesis_hash,
@@ -163,13 +163,13 @@ pub mod escrow {
     use algonaut::core::{to_app_address, Address as OtherAddress, MicroAlgos};
     use algonaut::{
         atomic_transaction_composer::{AbiArgValue, AtomicTransactionComposer},
-        error::ServiceError,
+        AlgodotError::ServiceError,
     };
 
-    use algonaut::transaction::{builder::TxnFee, builder::TxnFee::Fixed, Pay, TxnBuilder};
+    use algonaut_transaction::{builder::TxnFee, builder::TxnFee::Fixed, Pay, TxnBuilder};
 
     use algonaut::core::SuggestedTransactionParams as OtherSuggestedTransactionParams;
-    use algonaut::transaction::{account::Account, transaction::Payment};
+    use algonaut_transaction::{account::Account, transaction::Payment};
 
     use std::convert::TryInto;
     use std::str::FromStr;
