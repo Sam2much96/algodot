@@ -27,7 +27,7 @@ env:
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION: openssl-1.1.1l
   TOOLCHAIN: nightly
-  TARGETS: wasm-unknown-unknown
+  TARGETS: wasm-unknown-emscripten
   
   
 jobs:
@@ -52,7 +52,7 @@ jobs:
             toolchain: nightly
             override: true
             components: rustfmt, clippy
-            target: wasm32-unknown-unknown
+            target: wasm32-unknown-emscripten
 
       - name: "Setup for WASM compile"
 
@@ -164,7 +164,7 @@ jobs:
            #RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
            
            # Build Command To Wasm
-           #RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-unknown --release
+           #RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
 
            # Compile and Test On Firefox
            CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack test --firefox
