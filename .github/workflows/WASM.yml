@@ -159,5 +159,5 @@ jobs:
            #RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
            
            # Build Command To Wasm
-           RUST_BACKTRSCE=full cargo build --target=${TARGETS}
+           RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten
     
