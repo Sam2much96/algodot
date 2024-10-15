@@ -109,11 +109,8 @@ jobs:
           # Downgrade Bumpalo Module for cargo build for Nightly Compile
           cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
-          # Downgrade Clap Lex Module for Wasm Pack for Nightly Compile
-          cargo add clap_lex@=0.4.1
-          
           # Install Wasm Pack for Web Assemble Compile
-          cargo install wasm-pack
+          cargo +nightly-2023-01-27 install wasm-pack
 
           # Get the emsdk repo
           git clone https://github.com/emscripten-core/emsdk.git
