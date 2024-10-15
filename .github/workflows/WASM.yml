@@ -145,5 +145,5 @@ jobs:
            #export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export C_INCLUDE_PATH=$EMSDK/upstream/emscripten/cache/sysroot/include
           
-           RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
+           RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo build --target=wasm32-unknown-unknown
     
