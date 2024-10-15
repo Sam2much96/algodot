@@ -104,18 +104,12 @@ jobs:
           
       - name: "WASM Setup"
         run: |
-          # Linux Check Other Dependencies
-          # Should Ideally Be done via CI Commands using actions@cargoV1
-          # Install the specific version of Rust toolchain.
-          #rustup toolchain install nightly-2023-01-27
-
-          # Add wasm32-unknown-emscripten target to this toolchain.
-          #rustup +nightly-2023-01-27 target add wasm32-unknown-emscripten
-
-          # Check If Installed
-          #rustc +nightly --version --verbose
-          #emcc -v
+          # Setup Other Compile Dependencies For nightly 1.69
+          
           ls -al
+
+          # downgrade bumpalo module
+          cargo update -p bumpalo@3.16.0 --precise 3.15.0
            
       - name: "WASM compile"
         run: |
