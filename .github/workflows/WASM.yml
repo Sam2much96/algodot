@@ -109,6 +109,9 @@ jobs:
           # Downgrade Bumpalo Module for cargo build for Nightly Compile
           cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
+          # Downgrading Ahash Module to Remove an unstable feature from the nightly build toolchain causing an error
+          cargo update -p ahash --precise 0.8.10
+          
           # Install Compatible Wasm Pack for Web Assemble Compile
           cargo +nightly-2023-01-27 install --locked wasm-pack --version 0.11.1
 
