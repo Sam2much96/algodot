@@ -43,7 +43,6 @@ jobs:
       - name: "Setup for WASM compile"
 
         run: |
-          emcc -v
           cd /home/runner/work/algodot/algodot
           
           #Modify Cargo.toml for WASM
@@ -79,7 +78,10 @@ jobs:
           # Check Toml file
           cat Cargo.toml && cd 
           sudo apt-get update -y
-          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross
+          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross emscripten
+
+          # check emscripten
+          emcc -v
           
        # `cargo check` command here will use installed `nightly`
       # as it is set as an "override" for current directory
