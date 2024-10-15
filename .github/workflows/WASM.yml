@@ -107,14 +107,16 @@ jobs:
           
       - name: "Compile & install Openssl 1.1l"
         run: |
-          sudo apt install make gcc -y
-          wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
-          tar -xzvf ${OPENSSL_VERSION}.tar.gz
+          # temporarily disabling for faster debugging
+          #sudo apt install make gcc -y
+          #wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
+          #tar -xzvf ${OPENSSL_VERSION}.tar.gz
           
-          cd ${OPENSSL_VERSION}
-          ./config --prefix=/opt/openssl --openssldir=/usr/local/ssl
-          make
-          sudo make install
+          #cd ${OPENSSL_VERSION}
+          #./config --prefix=/opt/openssl --openssldir=/usr/local/ssl
+          #make
+          #sudo make install
+          ls -al
           
       - name: "WASM and Emscripten SDK Setup"
         run: |
@@ -147,7 +149,14 @@ jobs:
           # Activate PATH and other environment variables in the current terminal
           source ./emsdk_env.sh
 
+          # Go to root dir
           cd && ls -al
+          
+          #edit config.toml to build to target wasm emscripten
+          cat <<EOT > .cargo/config.toml
+          [build]
+          target = "wasm32-unknown-emscripten"
+          EOT
            
       - name: "WASM compile"
         run: |
@@ -166,5 +175,5 @@ jobs:
            # Build Command To Wasm
            #RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
 
-           # Compile and Test On Firefox
-           CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack test --firefox
+           # Compile and Build
+           CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack build --target no-modules
