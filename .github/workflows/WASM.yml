@@ -65,7 +65,7 @@ jobs:
           algodot_abi = { path = "abi" }
           algodot_core = { path = "core" }
           algodot_macros = { path = "macros" }
-          gdnative = { version = "0.11", features = ["async"] }
+          gdnative = { version = "0.10", features = ["async"] }
           
           [workspace]
           members = [
