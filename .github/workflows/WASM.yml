@@ -108,7 +108,7 @@ jobs:
           
           ls -al
           # Downgrade Bumpalo Module for Nightly Compile
-          cargo update -p bumpalo@3.16.0 --precise 3.14
+          cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
           
            
