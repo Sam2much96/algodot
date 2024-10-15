@@ -1,3 +1,13 @@
+# Features
+# (1) Toolchain as an env variable for easier testing
+# 
+# TO DO:
+# (1) 
+#
+# IDEAS:
+# (1) Custom Algonaut fork that uses appropriate dependencies
+# (2) 
+
 name: WASM CI
 
 on:
@@ -13,7 +23,7 @@ env:
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION: openssl-1.1.1l
-  GDNATIVE: /depreciated/path/to/gdnative rust crate in cargo repository
+  TOOLCHAIN: nightly
   
   
 jobs:
@@ -35,7 +45,7 @@ jobs:
       - name: Install specific nightly for wasm builds
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: nightly
+            toolchain: ${TOOLCHAIN}
             override: true
             components: rustfmt, clippy
             target: wasm32-unknown-unknown
