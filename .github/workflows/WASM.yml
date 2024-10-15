@@ -110,7 +110,7 @@ jobs:
           cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
           # Install Compatible Wasm Pack for Web Assemble Compile
-          cargo +nightly-2023-01-27 install wasm-pack --git https://github.com/rustwasm/wasm-pack.git --tag 0.11.1
+          cargo +nightly-2023-01-27 install wasm-pack --version 0.11.1
 
           # Get the emsdk repo
           git clone https://github.com/emscripten-core/emsdk.git
