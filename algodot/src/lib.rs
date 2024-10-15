@@ -1,3 +1,6 @@
+//needed for wasm compile on nightly toolchain, would break if compiled on stable
+#![feature(build_hasher_simple_hash_one)]
+
 use gdnative::prelude::*;
 use tokio::{
     runtime::{Builder, Runtime},
