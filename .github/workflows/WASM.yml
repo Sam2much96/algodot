@@ -99,12 +99,19 @@ jobs:
           make
           sudo make install
           
-      - name: "WASM install"
+      - name: "WASM Setup"
         run: |
           # Linux Check Other Dependencies
-          
-           rustc +nightly --version --verbose
-           emcc -v
+          # Should Ideally Be done via CI Commands using actions@cargoV1
+          # Install the specific version of Rust toolchain.
+          rustup toolchain install nightly-2023-01-27
+
+          # Add wasm32-unknown-emscripten target to this toolchain.
+          rustup +nightly-2023-01-27 target add wasm32-unknown-emscripten
+
+          # Check If Installed
+          rustc +nightly --version --verbose
+          emcc -v
 
            
       - name: "WASM compile"
