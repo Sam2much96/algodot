@@ -13,7 +13,7 @@ env:
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION: openssl-1.1.1l
-  GDNATIVE: /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gdnative-sys-0.11.3/godot_headers/gdnative
+  GDNATIVE: /depreciated/path/to/gdnative rust crate in cargo repository
   
   
 jobs:
@@ -61,7 +61,7 @@ jobs:
           path = "algodot/src/algod/mod.rs"
           
           [dependencies]
-          algonaut = { git = "https://github.com/manuelmauro/algonaut", rev = "75bce54" }
+          algonaut = { git = "https://github.com/manuelmauro/algonaut", version = "0.4.2" }
           algodot_abi = { path = "abi" }
           algodot_core = { path = "core" }
           algodot_macros = { path = "macros" }
