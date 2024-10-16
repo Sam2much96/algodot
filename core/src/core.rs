@@ -301,7 +301,7 @@ impl FromVariant for MyTransaction {
 }
 
 #[derive(Deref, DerefMut, From)]
-pub struct MyPendingTransaction(pub PendingTransaction);
+pub struct MyPendingTransaction(pub ‎PendingTransactionResponse);
 
 impl ToVariant for MyPendingTransaction {
     fn to_variant(&self) -> Variant {
