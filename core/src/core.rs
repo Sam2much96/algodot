@@ -3,7 +3,7 @@
 
 use algonaut::core::{MicroAlgos, Round, SuggestedTransactionParams};
 use algonaut::crypto::{HashDigest, Signature};
-use algonaut_model::algod::v2::PendingTransaction;
+use algonaut_algod::models::‎PendingTransactionResponse;
 use algonaut::transaction::account::Account;
 use algonaut::transaction::transaction::{
     ApplicationCallOnComplete, ApplicationCallTransaction, AssetAcceptTransaction,
