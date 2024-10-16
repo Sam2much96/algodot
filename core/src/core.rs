@@ -3,22 +3,23 @@
 
 use algonaut::core::{MicroAlgos, Round, SuggestedTransactionParams};
 use algonaut::crypto::{HashDigest, Signature};
-use algonaut_algod::models::‎PendingTransactionResponse;
 use algonaut::transaction::account::Account;
 use algonaut::transaction::transaction::{
     ApplicationCallOnComplete, ApplicationCallTransaction, AssetAcceptTransaction,
     AssetConfigurationTransaction, AssetParams, AssetTransferTransaction, Payment,
     TransactionSignature,
 };
+use algonaut_algod::models::PendingTransactionResponse;
 
+use algonaut::core::Address;
+use algonaut::error::RequestError;
 use algonaut::transaction::{SignedTransaction, Transaction, TransactionType};
-use algonaut::{core::Address, AlgodotError::ServiceError};
 use derive_more::{Deref, DerefMut, From, Into};
 use gdnative::api::JSON;
 use gdnative::prelude::*;
 use serde::Serialize;
 use std::str::FromStr;
-use thiserror::Error;
+use thiserror::Error; //use AlgodotError::ServiceError;
 
 /// This file contains implementations of ToVariant and FromVariant for algonaut types.
 ///
@@ -45,18 +46,19 @@ pub fn to_json_string<T: OwnedToVariant + ToVariant>(r: &T) -> GodotString {
 }
 
 #[derive(Error, Debug)]
+/* Url Error Handling */
 pub enum AlgodotError {
     #[error("error parsing header")]
     HeaderParseError,
     #[error("pool error: `{0}`")]
     PoolError(String),
     #[error("algonaut error:`{0}`")]
-    ServiceError(ServiceError),
+    RequestError(RequestError),
 }
 
-impl From<ServiceError> for AlgodotError {
-    fn from(err: ServiceError) -> Self {
-        AlgodotError::ServiceError(err)
+impl From<RequestError> for AlgodotError {
+    fn from(err: RequestError) -> Self {
+        AlgodotError::RequestError(err)
     }
 }
 
@@ -254,6 +256,7 @@ impl ToVariant for MyTransaction {
                 TransactionType::AssetClawbackTransaction(_) => todo!(),
                 TransactionType::AssetFreezeTransaction(_) => todo!(),
                 TransactionType::KeyRegistration(_) => todo!(),
+                TransactionType::StateProofTransaction(_) => todo!(),
             },
         );
         if let Some(gen) = &self.genesis_id {
@@ -301,7 +304,7 @@ impl FromVariant for MyTransaction {
 }
 
 #[derive(Deref, DerefMut, From)]
-pub struct MyPendingTransaction(pub ‎PendingTransactionResponse);
+pub struct MyPendingTransaction(pub PendingTransactionResponse);
 
 impl ToVariant for MyPendingTransaction {
     fn to_variant(&self) -> Variant {

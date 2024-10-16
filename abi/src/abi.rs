@@ -121,10 +121,11 @@ pub mod params {
 
     */
 
-    use algonaut::core::MicroAlgos;
-    use algonaut::core::Round;
+    //use algonaut::core::MicroAlgos;
+    //use algonaut::core::Round;
     use algonaut::core::SuggestedTransactionParams;
-    use algonaut_model::algod::v2::TransactionParams;
+    use algonaut_algod::models::TransactionParams200Response;
+    //use algonaut_model::transaction::ApiTransaction;
 
     pub struct MySuggestedTransactionParams(());
 
@@ -137,22 +138,7 @@ pub mod params {
             None
         }
 
-        /*
-
-        DOCS: https://docs.rs/algonaut_core/0.4.2/algonaut_core/struct.SuggestedTransactionParams.html
-
-        */
-
-        fn to_variant(&self, params: SuggestedTransactionParams) -> TransactionParams {
-            algonaut_model::algod::v2::TransactionParams {
-                consensus_version: params.consensus_version,
-                fee_per_byte: MicroAlgos(0u64),
-                genesis_hash: params.genesis_hash,
-                genesis_id: params.genesis_id,
-                last_round: Round(0u64),
-                min_fee: MicroAlgos(0u64),
-            }
-        }
+        fn to_variant(&self, params: SuggestedTransactionParams) -> TransactionParams200Response;
     }
 }
 
@@ -163,26 +149,31 @@ pub mod escrow {
     use algonaut::core::{to_app_address, Address as OtherAddress, MicroAlgos};
     use algonaut::{
         atomic_transaction_composer::{AbiArgValue, AtomicTransactionComposer},
-        AlgodotError::ServiceError,
+        //error::Error,
     };
 
-    use algonaut_transaction::{builder::TxnFee, builder::TxnFee::Fixed, Pay, TxnBuilder};
+    //use algonaut_algod::models::TransactionParams200Response;
+    use algonaut_transaction::{
+        builder::Pay, builder::TransactionParams, builder::TxnBuilder, Transaction,
+    };
 
     use algonaut::core::SuggestedTransactionParams as OtherSuggestedTransactionParams;
-    use algonaut_transaction::{account::Account, transaction::Payment};
+    use algonaut_transaction::account::Account; //, transaction::Payment
 
     use std::convert::TryInto;
     use std::str::FromStr;
 
     use algonaut::atomic_transaction_composer::transaction_signer::TransactionSigner::BasicAccount;
-    use algonaut::atomic_transaction_composer::AbiMethodResult;
-    use algonaut::atomic_transaction_composer::ExecuteResult;
+    use algonaut::atomic_transaction_composer::{AbiMethodResult, ExecuteResult};
+    use algonaut_crypto::HashDigest;
+    //use algonaut::atomic_transaction_composer::ExecuteResult;
     use gdnative::core_types::Dictionary;
     use gdnative::core_types::Variant;
     use gdnative::prelude::OwnedToVariant;
 
     #[derive(Debug, Clone)]
     pub struct Foo<'a> {
+        // Escrow DaPP Struct
         pub withdrw_amt: u32,
         pub withdrw_to_addr: [u8; 32],
         pub arg1: AbiArgValue,
@@ -199,13 +190,14 @@ pub mod escrow {
     }
 
     #[allow(dead_code)]
+    /* Escrow Smart Contract Mod Traits */
     trait MyTrait {
         type Foo<'a>;
         type Params;
         type Parsed;
         type Payment;
 
-        type ServiceError;
+        type Error;
 
         fn _app_id(&self, x: u64) -> u64;
         fn arg1(withdrw_amt: u64) -> AbiArgValue {
@@ -216,37 +208,15 @@ pub mod escrow {
         }
     }
 
+    // Required Trait for Suggested Transation Params
+
+    /*Godot ENgine Traits */
     pub trait ToVariant {
         fn to_variant(&self) -> Variant;
     }
 
-    /* Trait Implementations*/
-
-    impl MyTrait for Foo<'_> {
-        type Foo<'a> = Foo<'a>;
-        type Parsed = Option<String>;
-        type Payment = Option<Payment>;
-        type Params = Option<OtherSuggestedTransactionParams>;
-
-        type ServiceError = Option<ServiceError>;
-        fn _app_id(&self, x: u64) -> u64 {
-            x
-        }
-    }
-
     impl ToVariant for ExecuteResult {
-        //type ServiceError;
-
         fn to_variant(&self) -> Variant {
-            /*
-            ExecuteResult{
-                confirmed_round: None, //Some(x.confirmed_round),
-                tx_ids: x.tx_ids,
-                method_results: x.method_results,
-            }
-
-            */
-
             let dict = Dictionary::new();
             dict.insert("confirmed_round", Some(self.confirmed_round));
             dict.insert("tx_ids", self.tx_ids.clone());
@@ -255,7 +225,36 @@ pub mod escrow {
         }
     }
 
-    /* Smart Contract Arc 4 Implementation*/
+    /*Algonaut Traits */
+    // Create a wrapper around the foreign type using Ne Type method trait impl
+    pub struct MyTransactionParams {
+        pub params: OtherSuggestedTransactionParams, // Existing field
+        pub genesis_id: String,
+        pub hash: HashDigest, // Add a HashDigest field
+        pub last_round: u64,
+        pub min_fee: u64,
+    }
+
+    // Implement the trait for your wrapper
+    impl TransactionParams for MyTransactionParams {
+        // placeholder code to stop compiler errors for now
+        fn last_round(&self) -> u64 {
+            self.last_round
+        }
+
+        fn min_fee(&self) -> u64 {
+            self.min_fee
+        }
+
+        fn genesis_hash(&self) -> HashDigest {
+            self.hash // Return the HashDigest stored in the struct
+        }
+        fn genesis_id(&self) -> &String {
+            &self.genesis_id // Return a reference to the `genesis_id` field
+        }
+    }
+    //impl TransactionParams200Response for MyTransactionParams {}
+    /*Escrow Smart Contract Arc 4 Implementation*/
 
     impl Foo<'_> {
         pub fn note(size: u32) -> Option<Vec<u8>> {
@@ -279,8 +278,8 @@ pub mod escrow {
         pub fn pay(
             to_address: algonaut::core::Address,
             acct1: Account,
-            _params: algonaut::core::SuggestedTransactionParams,
-        ) -> algonaut::transaction::Transaction {
+            _params: MyTransactionParams, // My Own Params That Satisfy all traits //algonaut::core::SuggestedTransactionParams,
+        ) -> Transaction {
             /*
                 Constructs a Payment Transaction to an Address
             */
@@ -336,8 +335,8 @@ pub mod escrow {
             BasicAccount(algonaut::transaction::account::Account::from_mnemonic(mnemonic).unwrap())
         }
 
-        pub fn fee(amount: u64) -> TxnFee {
-            Fixed(MicroAlgos(amount))
-        }
+        //pub fn fee(amount: u64) -> TxnFee {
+        //    Fixed(MicroAlgos(amount))
+        //}
     }
 }
