@@ -31,7 +31,7 @@ use algonaut::transaction::transaction::{
 };
 use algonaut::transaction::tx_group::TxGroup;
 use algonaut::transaction::{
-    account::Account as OtherAccount, builder::CallApplication, Pay, TransactionType, TxnBuilder,
+    builder::CallApplication, Pay, TransactionType, TxnBuilder, //account::Account as OtherAccount,
 };
 use algonaut_algod::models::{PendingTransactionResponse, RawTransaction200Response};
 use gdnative::api::Engine;
@@ -177,24 +177,24 @@ impl Algodot {
         //It collects the results into a vector of header tuples ((String, String)) or returns an error.
         // Error Catcher for If token parameters is empty, it maps the headers to the token
         if self.token.is_empty() {
-            let headers = self
-                .headers
-                .read()
-                .iter()
-                .map(|header| -> Result<(String, String), AlgodotError> {
-                    let header = &header.to_string();
-                    let mut split = header.split(": ");
+            //let _headers = self //unused code bloc 
+            //    .headers
+            //    .read()
+             //   .iter()
+             //   .map(|header| -> Result<(String, String), AlgodotError> {
+             //       let header = &header.to_string();
+             //       let mut split = header.split(": ");
 
-                    let get_string = |split: &mut std::str::Split<&str>| {
-                        split
-                            .next()
-                            .map(|str| str.to_string())
-                            .ok_or(AlgodotError::HeaderParseError)
-                    };
+              //      let get_string = |split: &mut std::str::Split<&str>| {
+              //          split
+              //              .next()
+              //              .map(|str| str.to_string())
+              //              .ok_or(AlgodotError::HeaderParseError)
+               //     };
 
-                    Ok((get_string(&mut split)?, get_string(&mut split)?))
-                })
-                .collect::<Result<Vec<(String, String)>, AlgodotError>>();
+               //     Ok((get_string(&mut split)?, get_string(&mut split)?))
+               // })
+               // .collect::<Result<Vec<(String, String)>, AlgodotError>>();
 
             // Depreciated with_headers method in algonaut 0.4.2
             // if let Some(headers) = godot_unwrap!(headers) {
@@ -550,13 +550,13 @@ asyncmethods!(algod, node, this,
         }
     }
 
-    fn construct_atc(ctx, args) {
+    fn construct_atc(_ctx, args) {
         // Get Params
         // Extract the arguments from `args` as needed
         let params: SuggestedTransactionParams = args.read::<SuggestedTransactionParams>().get().unwrap();
 
         // TO DO : Send String and Convert string to address for this params
-        let mut sender: String = args.read::<String>().get().unwrap(); // sender address
+        let sender: String = args.read::<String>().get().unwrap(); // sender address
 
         // secret key
         let mnemonic: String = args.read::<String>().get().unwrap();
@@ -617,16 +617,16 @@ asyncmethods!(algod, node, this,
 
         atc.build_group().expect("Error Building ATC Group");
 
-        let dict = Dictionary::new()
+        let dict = Dictionary::new();
         async move{
         // Execute the ATC
-        let result: ExecuteResult = atc.execute(&algod).await.expect("ATC Execute Error");
+        let result: ExecuteResult = atc.execute(&algod.as_ref()).await.expect("ATC Execute Error");
         dict.insert("confirmed round", result.confirmed_round);
         dict.insert("tx_ids", result.tx_ids);
 
         //let p = to_json_dict(&result);
-        godot_unwrap!(dict).to_variant()
-
+        //godot_unwrap!(dict).to_variant()
+        dict.owned_to_variant()
 
     }}
 
