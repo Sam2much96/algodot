@@ -110,37 +110,37 @@ pub mod atc {
     }
 }
 
-pub mod params {
+//pub mod params {
 
-    /*
-        Temporary Fix for Params Error Between algodot_core and algonaut suggested
-        transaction parameters
+/*
+    Temporary Fix for Params Error Between algodot_core and algonaut suggested
+    transaction parameters
 
-        TO DO :
-        (1) Depreciate this codebase and implement godot dictionary trait from algodot code my suggested transactions impl
+    TO DO :
+    (1) Depreciate this codebase and implement godot dictionary trait from algodot code my suggested transactions impl (1/2)
 
-    */
+*/
 
-    //use algonaut::core::MicroAlgos;
-    //use algonaut::core::Round;
-    use algonaut::core::SuggestedTransactionParams;
-    use algonaut_algod::models::TransactionParams200Response;
-    //use algonaut_model::transaction::ApiTransaction;
+//use algonaut::core::MicroAlgos;
+//use algonaut::core::Round;
+//    use algonaut::core::SuggestedTransactionParams;
+//    use algonaut_algod::models::TransactionParams200Response;
+//use algonaut_model::transaction::ApiTransaction;
 
-    pub struct MySuggestedTransactionParams(());
+//    pub struct MySuggestedTransactionParams(());
 
-    pub trait Into {
-        fn _app_id(&self, x: u64) -> u64;
-        fn default(&self) -> Option<String>
-        where
-            Self: Sized,
-        {
-            None
-        }
+//    pub trait Into {
+//        fn _app_id(&self, x: u64) -> u64;
+//       fn default(&self) -> Option<String>
+//      where
+//          Self: Sized,
+//      {
+//          None
+//     }
 
-        fn to_variant(&self, params: SuggestedTransactionParams) -> TransactionParams200Response;
-    }
-}
+//     fn to_variant(&self, params: SuggestedTransactionParams) -> TransactionParams200Response;
+// }
+//}
 
 pub mod escrow {
 
@@ -153,11 +153,9 @@ pub mod escrow {
     };
 
     //use algonaut_algod::models::TransactionParams200Response;
-    use algonaut_transaction::{
-        builder::Pay, builder::TransactionParams, builder::TxnBuilder, Transaction,
-    };
-
-    use algonaut::core::SuggestedTransactionParams as OtherSuggestedTransactionParams;
+    use algonaut_transaction::{builder::Pay, builder::TxnBuilder, Transaction};
+    //use algonaut_transaction::builder::TxnFee;
+    //use algonaut::core::SuggestedTransactionParams as OtherSuggestedTransactionParams; //builder::TransactionParams,
     use algonaut_transaction::account::Account; //, transaction::Payment
 
     use std::convert::TryInto;
@@ -165,11 +163,17 @@ pub mod escrow {
 
     use algonaut::atomic_transaction_composer::transaction_signer::TransactionSigner::BasicAccount;
     use algonaut::atomic_transaction_composer::{AbiMethodResult, ExecuteResult};
-    use algonaut_crypto::HashDigest;
+    //use algonaut_crypto::HashDigest;
     //use algonaut::atomic_transaction_composer::ExecuteResult;
-    use gdnative::core_types::Dictionary;
-    use gdnative::core_types::Variant;
-    use gdnative::prelude::OwnedToVariant;
+    //use gdnative::core_types::Dictionary;
+    //use gdnative::core_types::Variant;
+    //use gdnative::prelude::OwnedToVariant;
+
+    // Transaction Params
+    //use algonaut::core::SuggestedTransactionParams;
+    //use algonaut_algod::models::TransactionParams200Response;
+
+    use algodot_core::SuggestedTransactionParams;
 
     #[derive(Debug, Clone)]
     pub struct Foo<'a> {
@@ -210,9 +214,15 @@ pub mod escrow {
 
     // Required Trait for Suggested Transation Params
 
-    /*Godot ENgine Traits */
+    /*Godot ENgine Traits
     pub trait ToVariant {
         fn to_variant(&self) -> Variant;
+    }
+    pub trait Into {
+        fn to_variant(&self, params: SuggestedTransactionParams) -> TransactionParams200Response;
+    }
+    pub trait FromVariant {
+        fn from_variant(&self, _var: Variant) -> Dictionary;
     }
 
     impl ToVariant for ExecuteResult {
@@ -253,8 +263,20 @@ pub mod escrow {
             &self.genesis_id // Return a reference to the `genesis_id` field
         }
     }
+
+    impl FromVariant for MyTransactionParams {
+        fn from_variant(&self, _var: Variant) -> Dictionary {
+            //return an empty DIctionary for now
+            // should ideally deserialise Suggested Transaction Params into a dictionary
+            //Dictionary::new()
+            todo!()
+        }
+    }
+
     //impl TransactionParams200Response for MyTransactionParams {}
-    /*Escrow Smart Contract Arc 4 Implementation*/
+    */
+
+    /*Escrow Smart Contract Arc 4 Implementation in functional programming*/
 
     impl Foo<'_> {
         pub fn note(size: u32) -> Option<Vec<u8>> {
@@ -278,7 +300,7 @@ pub mod escrow {
         pub fn pay(
             to_address: algonaut::core::Address,
             acct1: Account,
-            _params: MyTransactionParams, // My Own Params That Satisfy all traits //algonaut::core::SuggestedTransactionParams,
+            _params: SuggestedTransactionParams, // My Own Params That Satisfy all traits //algonaut::core::SuggestedTransactionParams,
         ) -> Transaction {
             /*
                 Constructs a Payment Transaction to an Address
@@ -335,8 +357,8 @@ pub mod escrow {
             BasicAccount(algonaut::transaction::account::Account::from_mnemonic(mnemonic).unwrap())
         }
 
-        //pub fn fee(amount: u64) -> TxnFee {
-        //    Fixed(MicroAlgos(amount))
-        //}
+        pub fn fee(amount: u64) -> MicroAlgos {
+            MicroAlgos(amount)
+        }
     }
 }

@@ -8,6 +8,7 @@ gdnative = { version = "0.11", features = ["async"] }
 algonaut = { git = "https://github.com/manuelmauro/algonaut", branch = "dependabot/cargo/ring-0.17.5" }
 algonaut_algod =  { git = "https://github.com/manuelmauro/algonaut",package="algonaut_algod", branch = "dependabot/cargo/ring-0.17.5" }
 algonaut_transaction =  { git = "https://github.com/manuelmauro/algonaut", package="algonaut_transaction", branch = "dependabot/cargo/ring-0.17.5" }
+algonaut_crypto =  { git = "https://github.com/manuelmauro/algonaut", package="algonaut_crypto", branch = "dependabot/cargo/ring-0.17.5" }
 num-bigint = {git = "https://github.com/rust-num/num-bigint", version = "0.4"}
 derive_more = "0.99.16"
 serde = "1.0"

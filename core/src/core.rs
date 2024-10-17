@@ -12,8 +12,12 @@ use algonaut::transaction::transaction::{
 use algonaut_algod::models::PendingTransactionResponse;
 
 use algonaut::core::Address;
-use algonaut::error::RequestError;
+//use algonaut::error::RequestError
 use algonaut::transaction::{SignedTransaction, Transaction, TransactionType};
+use algonaut::Error;
+use algonaut_algod::models::TransactionParams200Response;
+//use algonaut_crypto::HashDigest;
+use algonaut_transaction::builder::TransactionParams;
 use derive_more::{Deref, DerefMut, From, Into};
 use gdnative::api::JSON;
 use gdnative::prelude::*;
@@ -46,19 +50,21 @@ pub fn to_json_string<T: OwnedToVariant + ToVariant>(r: &T) -> GodotString {
 }
 
 #[derive(Error, Debug)]
-/* Url Error Handling */
+/*
+Error Handling exposed to godot
+*/
 pub enum AlgodotError {
     #[error("error parsing header")]
     HeaderParseError,
     #[error("pool error: `{0}`")]
     PoolError(String),
     #[error("algonaut error:`{0}`")]
-    RequestError(RequestError),
+    Error(Error),
 }
 
-impl From<RequestError> for AlgodotError {
-    fn from(err: RequestError) -> Self {
-        AlgodotError::RequestError(err)
+impl From<Error> for AlgodotError {
+    fn from(err: Error) -> Self {
+        AlgodotError::Error(err)
     }
 }
 
@@ -99,7 +105,7 @@ impl MyAccount {
 #[derive(Deref, DerefMut, From, Clone)]
 pub struct MySuggestedTransactionParams(SuggestedTransactionParams);
 
-//used when constructing To a variant
+//Godot Exposed TransactionParams for this project main and sub modules (abi) that satisfies all required Godot And Algonaut Trait Boud
 impl ToVariant for MySuggestedTransactionParams {
     fn to_variant(&self) -> Variant {
         let dict = Dictionary::new();
@@ -149,6 +155,38 @@ impl From<MySuggestedTransactionParams> for algonaut::core::SuggestedTransaction
             min_fee: MicroAlgos(2500),
             first_valid: n.first_valid,
             last_valid: n.last_valid,
+        }
+    }
+}
+impl TransactionParams for MySuggestedTransactionParams {
+    fn last_round(&self) -> u64 {
+        self.last_valid.0
+    }
+
+    fn min_fee(&self) -> u64 {
+        self.min_fee.0
+    }
+
+    fn genesis_hash(&self) -> HashDigest {
+        self.genesis_hash.clone()
+    }
+
+    fn genesis_id(&self) -> &String {
+        &self.genesis_id
+    }
+}
+//MySuggestedTransactionParams(SuggestedTransactionParams) is a tuple struct wraped arround Suggested Trans Params,
+//meaning it holds a single unnamed field of type SuggestedTransactionParams. The 0 index accesses that field.
+impl Into<TransactionParams200Response> for MySuggestedTransactionParams {
+    fn into(self) -> TransactionParams200Response {
+        TransactionParams200Response {
+            genesis_id: self.0.genesis_id,
+            genesis_hash: self.0.genesis_hash,
+            consensus_version: self.0.consensus_version,
+            min_fee: self.0.min_fee.0,
+            //first_valid: self.0.first_valid,
+            //last_valid: self.0.last_valid,
+            ..Default::default() // Fills in other fields with default values
         }
     }
 }

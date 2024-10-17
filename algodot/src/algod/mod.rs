@@ -1,11 +1,21 @@
+/*
+This Module Exposes Algonaut Algod Node To Godot, handles Errors and Connects Algonaut_crypto,
+Algonaut ABI, and My Custom Escrow Smart Contract Through Here To Godot
+
+TO DO:
+(1) Implement Block Storage in via Algod Node
+(2) Transaction Params Shluld Be a shared struct with proper traits btw algodot core, abi and algodot node
+*/
+
 //use algodot_abi::abi_smartcontract::*;
 use algodot_abi::abi_smartcontract::Foo as abiFoo;
 use algodot_abi::escrow::Foo as escrowFoo;
-use algodot_core::*;
-use algodot_macros::*;
+//use algodot_abi::escrow::MyTransactionParams; // Get Custom transation Params that implements all traits and is reusable
+
+use algodot_core::*; // Godot Class Exposing Algonaut Core
+use algodot_macros::*; // Plugin Custom Macros
 use algonaut::algod::v2::Algod;
-use algonaut::core::{Address as OtherAddress, MicroAlgos, Round};
-use algonaut::model::algod::v2::{PendingTransaction, TransactionResponse};
+use algonaut::core::{Address as OtherAddress, MicroAlgos}; //Round
 use algonaut::transaction::transaction::{
     ApplicationCallOnComplete::NoOp, AssetAcceptTransaction, AssetConfigurationTransaction,
     AssetParams, AssetTransferTransaction,
@@ -14,13 +24,14 @@ use algonaut::transaction::tx_group::TxGroup;
 use algonaut::transaction::{
     account::Account as OtherAccount, builder::CallApplication, Pay, TransactionType, TxnBuilder,
 };
+use algonaut_algod::models::{PendingTransactionResponse, RawTransaction200Response};
 use gdnative::api::Engine;
 use gdnative::prelude::*;
 use gdnative::tasks::{Async, AsyncMethod, Spawner};
 
-use std::rc::Rc;
-
 use algonaut::atomic_transaction_composer::{AddMethodCallParams, ExecuteResult};
+use std::rc::Rc;
+//use std::sync::Arc;
 
 #[derive(NativeClass, Clone)]
 #[inherit(Node)]
@@ -32,21 +43,23 @@ pub struct Algodot {
     #[property(set = "Self::set_token")]
     token: String,
 
-    #[property(set = "Self::set_headers")]
-    headers: PoolArray<GodotString>,
-
+    //#[property(set = "Self::set_headers")]
+    headers: PoolArray<GodotString>, // Depreciated Method
     algod: Rc<Algod>,
 }
 
 impl Algodot {
+    /// Build a v2 client for Algorand protocol daemon.
     fn new(_base: &Node) -> Self {
         Algodot {
             url: String::new(),
             token: String::new(),
-            headers: PoolArray::<GodotString>::new(),
+            headers: PoolArray::<GodotString>::new(), // Depreciated headers method in 0.4.2 algod
 
+            /* It Is Rc Reference Counted So Rust Holds is in memory instead of deallocating it */
             // algod will be initialised on _enter_tree()
-            // leave these default values here for now
+            // These are temporary default values
+            // To DO: Change Default To Testnet
             algod: Rc::new(
                 Algod::new(
                     "http://localhost:4001",
@@ -79,13 +92,16 @@ impl Algodot {
 
     async fn wait_for_transaction(
         algod: Rc<Algod>,
-        tx: TransactionResponse,
-    ) -> Result<PendingTransaction, AlgodotError> {
+        tx: RawTransaction200Response,
+    ) -> Result<PendingTransactionResponse, AlgodotError> {
         let status = algod.status().await?;
         let mut round = status.last_round - 1;
+
+        // Recursively
         loop {
-            algod.status_after_round(Round(round)).await?;
-            let txn = algod.pending_transaction_with_id(&tx.tx_id).await?;
+            //let given_round = Round(round)
+            algod.status_after_block(round).await?; // Gets the node status after waiting for the given round.
+            let txn = algod.pending_txn(&tx.tx_id).await?; //Get a specific pending transaction.
             if let Some(confirmed_round) = txn.confirmed_round {
                 if confirmed_round != 0 {
                     return Ok(txn);
@@ -117,10 +133,12 @@ impl Algodot {
         self.update_algod();
     }
 
+    // Requires with_header method which is depreciated in bleeding edge algonaut build
     #[method]
     fn set_headers(&mut self, #[base] _base: TRef<Node>, headers: PoolArray<GodotString>) {
         self.headers = headers;
-        self.update_algod();
+        //self.update_algod();
+        // Headers Functinality Is Depreciated In ALgonaut 0.4.2
     }
 
     fn update_algod(&mut self) {
@@ -130,6 +148,11 @@ impl Algodot {
             return;
         }
         let algod: Algod;
+        //This code checks if the token is empty and, if so, processes HTTP headers stored in a shared,
+        //thread-safe manner. It uses the read() method to access the headers and iterates over them,
+        //It attempts to retrieve both the key and value of each header, converting them into strings. If parsing fails, it returns an AlgodotError::HeaderParseError.
+        //It collects the results into a vector of header tuples ((String, String)) or returns an error.
+        // Error Catcher for If token parameters is empty, it maps the headers to the token
         if self.token.is_empty() {
             let headers = self
                 .headers
@@ -150,16 +173,17 @@ impl Algodot {
                 })
                 .collect::<Result<Vec<(String, String)>, AlgodotError>>();
 
-            if let Some(headers) = godot_unwrap!(headers) {
-                let headers: Vec<(&str, &str)> = headers
-                    .iter()
-                    .map(|(str1, str2)| -> (&str, &str) { (str1, str2) })
-                    .collect();
+            // Depreciated with_headers method in algonaut 0.4.2
+            // if let Some(headers) = godot_unwrap!(headers) {
+            //   let headers: Vec<(&str, &str)> = headers
+            //       .iter()
+            //       .map(|(str1, str2)| -> (&str, &str) { (str1, str2) })
+            //        .collect();
 
-                algod = Algod::with_headers(&self.url, headers).unwrap();
-
-                self.algod = Rc::new(algod);
-            }
+            //algod = Algod::with_headers(&self.url, headers).unwrap(); // Deprecaiated Method
+            //    algod = Algod::with_headers(&self.url, headers).unwrap();
+            //    self.algod = Rc::new(algod);
+            //}
         } else {
             algod = Algod::new(&self.url, &self.token).unwrap();
             self.algod = Rc::new(algod);
@@ -299,7 +323,7 @@ impl Algodot {
         .unwrap()
         .into()
     }
-
+    /*
     #[method(async)]
     #[allow(clippy::too_many_arguments)]
     async fn construct_atc(
@@ -309,91 +333,68 @@ impl Algodot {
         An exported async method that returns a dictionary of the tx id or error code
         */
         //#[async_ctx]
-        //#[opt] &self,
+        &self,
         params: SuggestedTransactionParams,
         sender: Address,
         mnemonic: String,
         app_id: u64,
         #[opt] _app_arguments: Option<String>,
     ) -> Dictionary {
-        //Returns Opaque Type //Result<ExecuteResult, ServiceError> //Result<(), Foo>
-
-        let mut atc = escrowFoo::new_atc();
-
-        let mut _to_addr: [u8; 32] = escrowFoo::address_to_bytes(sender.to_string()); //[0; 32];
-
-        let _acct: OtherAccount = OtherAccount::from_mnemonic(&mnemonic).unwrap();
-        //let _addr_as_string: String = _acct.address().to_string();
-
-        let mut _my_addr: OtherAddress =
-            escrowFoo::address_to_address(&_acct.address().to_string());
-
-        let pages: u32 = 0;
-
-        //Txn Details As a Struct
-        let details = escrowFoo {
-            withdrw_amt: 0u32,
-            withdrw_to_addr: _to_addr,
-            arg1: escrowFoo::withdraw_amount(5000u32),
-            arg2: escrowFoo::address(_my_addr),
-            _app_id: app_id, //__app_id.clone(),
-            _escrow_address: escrowFoo::app_address(&app_id),
-            atc: &atc,
-        };
-
-        let k = params.into();
-
-        //godot_dbg!(" Params Debug: {}", &k);
-
-        atc.add_method_call(&mut AddMethodCallParams {
-            app_id: details._app_id,
-            method: abiFoo::withdraw(), //bar::Foo::withdraw() //for deposits //bar::Foo::deposit()
-            method_args: vec![details.arg1, details.arg2],
-            fee: escrowFoo::fee(2500),
-            sender: *sender,
-            suggested_params: k, //params.into(),
-            on_complete: NoOp,
-            approval_program: None,
-            clear_program: None,
-            global_schema: None,
-            local_schema: None,
-            extra_pages: pages,
-            note: escrowFoo::note(0u32), //_note,
-            lease: None,
-            rekey_to: None,
-            signer: escrowFoo::basic_account(&mnemonic),
-        })
-        .unwrap();
-
-        atc.build_group().expect("Error");
-
-        //godot_dbg!(" ATC Debug: {}", &atc);
-
-        //Testnet
-        // Should ideally get initialization code from Algodot Type but
-        // That would require editting the init variables to global variables with lifetimes
-
-        let url = String::from("https://node.testnet.algoexplorerapi.io");
-
-        let user = String::from("User-Agent");
-        let pass = String::from("DoYouLoveMe?");
-        let headers: Vec<(&str, &str)> = vec![(&user, &pass)];
-        let po = Algod::with_headers(&url, headers).unwrap();
-        let result: ExecuteResult = atc.execute(&po).await.expect("Error");
-        godot_dbg!(atc.status());
-
-        //Ok(())
-        // implement To and From Variant traits in ATC for Easy executing and Parsing
-        // implement traits for ExecuteResult and Service Error
-        // Parse ATC.build group() to .json
-        // Rewrite this method as async
-        // figure out async macro in core.rs
         let dict = Dictionary::new();
-        dict.insert("confirmed round", result.confirmed_round);
-        dict.insert("tx_ids", result.tx_ids);
-        //dict.insert("status ", atc.status());
-        dict.into()
+
+    // Use thread-local executor
+    EXECUTOR.with(|e| {
+        self.runtime
+            .block_on(async {
+                let mut atc = escrowFoo::new_atc();
+                let mut _to_addr: [u8; 32] = escrowFoo::address_to_bytes(sender.to_string());
+
+                let _acct: OtherAccount = OtherAccount::from_mnemonic(&mnemonic).unwrap();
+                let mut _my_addr: OtherAddress = escrowFoo::address_to_address(&_acct.address().to_string());
+
+                let pages: u32 = 0;
+                let details = escrowFoo {
+                    withdrw_amt: 0u32,
+                    withdrw_to_addr: _to_addr,
+                    arg1: escrowFoo::withdraw_amount(5000u32),
+                    arg2: escrowFoo::address(_my_addr),
+                    _app_id: app_id,
+                    _escrow_address: escrowFoo::app_address(&app_id),
+                    atc: &atc,
+                };
+
+                let k = params.into();
+                atc.add_method_call(&mut AddMethodCallParams {
+                    app_id: details._app_id,
+                    method: abiFoo::withdraw(),
+                    method_args: vec![details.arg1, details.arg2],
+                    fee: escrowFoo::fee(2500),
+                    sender: *sender,
+                    suggested_params: k,
+                    on_complete: NoOp,
+                    approval_program: None,
+                    clear_program: None,
+                    global_schema: None,
+                    local_schema: None,
+                    extra_pages: pages,
+                    note: escrowFoo::note(0u32),
+                    lease: None,
+                    rekey_to: None,
+                    signer: escrowFoo::basic_account(&mnemonic),
+                }).unwrap();
+
+                atc.build_group().expect("Error");
+                let result: ExecuteResult = atc.execute(&self.algod).await.expect("Error");
+                dict.insert("confirmed round", result.confirmed_round);
+                dict.insert("tx_ids", result.tx_ids);
+                dict
+            })
+            .unwrap()
+    });
+
+    dict
     }
+    */
 
     #[method]
     fn construct_asset_opt_in(
@@ -429,7 +430,18 @@ impl Algodot {
     }
 }
 
-/*ASync Methods*/
+/*
+ASync Methods
+
+It Exposes Algonaut's Algod Node's Methods to Godot Engine
+It mostly async cuz it mainly netcode which is asynchronus
+e.g javascript async await
+The asyncmethods macro simplifies the process of registering an
+async method with Godot by automatically generating the required
+AsyncMethod struct and boilerplate code for method registration.
+
+arg functions like the kwargs** in argument python
+*/
 
 asyncmethods!(algod, node, this,
     fn health(_ctx, _args) {
@@ -442,10 +454,10 @@ asyncmethods!(algod, node, this,
             }
         }
     }
-
+    // Gets a Suggested Transaction Parameter Algorand Protocol and Convert it to A Trait supported Type (Core.rs) using our Custom macro
     fn suggested_transaction_params(_ctx, _args) {
         async move {
-            let params = algod.suggested_transaction_params().await.map(SuggestedTransactionParams::from);
+            let params = algod.txn_params().await.map(SuggestedTransactionParams::from);
             godot_unwrap!(params).to_variant()
         }
     }
@@ -465,10 +477,11 @@ asyncmethods!(algod, node, this,
         }
     }
 
+    // Given a specific account public key, this call returns the accounts status, balance and spendable amounts
     fn account_information(_ctx, args) {
         let address = args.read::<Address>().get().unwrap();
         async move {
-            let info = algod.account_information(&address).await;
+            let info = algod.account(&address).await;
             godot_unwrap!(info).map(|info| to_json_dict(&info)).to_variant()
         }
     }
@@ -477,7 +490,7 @@ asyncmethods!(algod, node, this,
         let txid = args.read::<String>().get().unwrap();
 
         async move {
-            let info = algod.pending_transaction_with_id(txid.as_ref()).await;
+            let info = algod.pending_txn(txid.as_ref()).await;
             godot_unwrap!(info).map(|info| to_json_dict(&info)).to_variant()
         }
     }
@@ -486,7 +499,7 @@ asyncmethods!(algod, node, this,
         let txn = args.read::<SignedTransaction>().get().unwrap();
 
         async move {
-            let txid = algod.broadcast_signed_transaction(&txn).await;
+            let txid = algod.send_txn(&txn).await;
             godot_unwrap!(txid).map(|txid| txid.tx_id).to_variant()
         }
     }
@@ -495,7 +508,7 @@ asyncmethods!(algod, node, this,
         let tx_id = args.read::<String>().get().unwrap();
 
         async move {
-            let pending_tx = Algodot::wait_for_transaction(algod, TransactionResponse { tx_id }).await;
+            let pending_tx = Algodot::wait_for_transaction(algod, RawTransaction200Response { tx_id }).await;
             godot_unwrap!(pending_tx).map(|tx| to_json_dict(&tx)).to_variant()
         }
     }
@@ -505,7 +518,7 @@ asyncmethods!(algod, node, this,
         let txns: Vec<algonaut::transaction::SignedTransaction> = vartxns.iter().map(|tx| tx.0.clone()).collect();
 
         async move {
-            let txid = algod.broadcast_signed_transactions(txns.as_slice()).await;
+            let txid = algod.send_txns(txns.as_slice()).await;
             godot_unwrap!(txid).map(|txid| to_json_dict(&txid)).to_variant()
         }
     }
@@ -514,9 +527,72 @@ asyncmethods!(algod, node, this,
         let source_code = args.read::<String>().get().unwrap();
 
         async move {
-            let compiled = algod.compile_teal(source_code.as_bytes()).await;
+            let compiled = algod.teal_compile(source_code.as_bytes(), None).await;
             godot_unwrap!(compiled).map(|c| (c.hash().0.to_vec().to_variant(), c.bytes_to_sign().to_variant())).to_variant()
         }
     }
+
+    fn construct_atc(ctx, args) {
+        // Extract the arguments from `args` as needed
+        let params: SuggestedTransactionParams = args.read::<SuggestedTransactionParams>.get().unwrap();
+        let sender: Address = args.read::<Address>(1).unwrap();
+        let mnemonic: String = args.read::<String>(2).unwrap();
+        let app_id: u64 = args.read::<u64>(3).unwrap();
+        let _app_arguments: Option<String> = args.read::<Option<String>>(4).unwrap();
+
+        let mut atc = escrowFoo::new_atc();
+
+        let mut _to_addr: [u8; 32] = escrowFoo::address_to_bytes(sender.to_string());
+
+        let _acct: OtherAccount = OtherAccount::from_mnemonic(&mnemonic).unwrap();
+        let mut _my_addr: OtherAddress = escrowFoo::address_to_address(&_acct.address().to_string());
+
+        let pages: u32 = 0;
+
+        // Transaction details
+        let details = escrowFoo {
+            withdrw_amt: 0u32,
+            withdrw_to_addr: _to_addr,
+            arg1: escrowFoo::withdraw_amount(5000u32),
+            arg2: escrowFoo::address(_my_addr),
+            _app_id: app_id,
+            _escrow_address: escrowFoo::app_address(&app_id),
+            atc: &atc,
+        };
+
+        let k = params.into();
+
+        atc.add_method_call(&mut AddMethodCallParams {
+            app_id: details._app_id,
+            method: abiFoo::withdraw(), //abiFoo::deposit() to deposit
+            method_args: vec![details.arg1, details.arg2],
+            fee: escrowFoo::fee(2500),
+            sender: *sender,
+            suggested_params: k,
+            on_complete: NoOp,
+            approval_program: None,
+            clear_program: None,
+            global_schema: None,
+            local_schema: None,
+            extra_pages: pages,
+            note: escrowFoo::note(0u32),
+            lease: None,
+            rekey_to: None,
+            signer: escrowFoo::basic_account(&mnemonic),
+        })
+        .unwrap();
+
+        atc.build_group().expect("Error");
+
+        // Execute the ATC
+        let result: ExecuteResult = atc.execute(&algod).expect("Error");
+
+        // Create a Godot dictionary to return results
+        let dict = Dictionary::new();
+        dict.insert("confirmed round", result.confirmed_round);
+        dict.insert("tx_ids", result.tx_ids);
+        dict.into()
+    }
+
 
 );
