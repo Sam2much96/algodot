@@ -184,10 +184,27 @@ impl Into<TransactionParams200Response> for MySuggestedTransactionParams {
             genesis_hash: self.0.genesis_hash,
             consensus_version: self.0.consensus_version,
             min_fee: self.0.min_fee.0,
-            //first_valid: self.0.first_valid,
-            //last_valid: self.0.last_valid,
+
             ..Default::default() // Fills in other fields with default values
         }
+    }
+}
+impl From<TransactionParams200Response> for MySuggestedTransactionParams {
+    // duplicate of From trait bound above
+    fn from(response: TransactionParams200Response) -> MySuggestedTransactionParams {
+        //Serialise TransactionParams from Transaction Resposinse and Check if ok
+        let t = SuggestedTransactionParams {
+            genesis_id: response.genesis_id,
+            consensus_version: response.consensus_version,
+            min_fee: MicroAlgos(response.fee),
+            fee_per_byte: MicroAlgos(response.fee),
+            genesis_hash: response.genesis_hash,
+            first_valid: Round(response.last_round), //get the last valid round from Transaction params
+            last_valid: Round(response.last_round + 1000), // Transaction would be valid for 1000 block est 1 hour
+        };
+        //Ok(MySuggestedTransactionParams(t))
+        MySuggestedTransactionParams(t)
+        //t
     }
 }
 

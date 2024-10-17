@@ -2,6 +2,15 @@
 This Module Exposes Algonaut Algod Node To Godot, handles Errors and Connects Algonaut_crypto,
 Algonaut ABI, and My Custom Escrow Smart Contract Through Here To Godot
 
+
+This code base is split into 2
+Unrigistered Async Functions
+Restesitered Async Methods that implement the unregistered code
+THe Registered methods implement the unreigistered class via functional and OOP code structure
+Where Algod node is the obj and the unregistered async methods are the functional code
+I Hope That makes sense
+It Doesn't necessarily require the gdnative async macro with this implementation
+
 TO DO:
 (1) Implement Block Storage in via Algod Node
 (2) Transaction Params Shluld Be a shared struct with proper traits btw algodot core, abi and algodot node
@@ -90,7 +99,16 @@ impl Algodot {
             .done();
     }
 
-    async fn wait_for_transaction(
+    /*
+       Async Functions Writen, No Registered,
+       Only Exposed To Rust. They Are Called and Implement
+       Below in an Async Macro That's Registered and Accessible Via Godot
+
+    */
+
+    /// Waits for a block to appear after round {round} and returns the node's status at the time.
+    /// DOCs: https://github.com/manuelmauro/algonaut/blob/e7702a51c7cf7ece220293fc6a723b4d10b8040a/src/algod/v2/mod.rs#L447
+    async fn wait_for_block(
         algod: Rc<Algod>,
         tx: RawTransaction200Response,
     ) -> Result<PendingTransactionResponse, AlgodotError> {
@@ -113,6 +131,11 @@ impl Algodot {
         }
     }
 }
+
+/*
+Non Async Functions Registered With The Method Macro
+
+*/
 
 #[methods]
 impl Algodot {
@@ -342,10 +365,7 @@ impl Algodot {
     ) -> Dictionary {
         let dict = Dictionary::new();
 
-    // Use thread-local executor
-    EXECUTOR.with(|e| {
-        self.runtime
-            .block_on(async {
+    //
                 let mut atc = escrowFoo::new_atc();
                 let mut _to_addr: [u8; 32] = escrowFoo::address_to_bytes(sender.to_string());
 
@@ -431,7 +451,7 @@ impl Algodot {
 }
 
 /*
-ASync Methods
+ASync Methods Implementation + Macros
 
 It Exposes Algonaut's Algod Node's Methods to Godot Engine
 It mostly async cuz it mainly netcode which is asynchronus
@@ -441,6 +461,8 @@ async method with Godot by automatically generating the required
 AsyncMethod struct and boilerplate code for method registration.
 
 arg functions like the kwargs** in argument python
+
+It Also Creates A Context with algod node so you can directly reference it
 */
 
 asyncmethods!(algod, node, this,
@@ -454,22 +476,14 @@ asyncmethods!(algod, node, this,
             }
         }
     }
-    // Gets a Suggested Transaction Parameter Algorand Protocol and Convert it to A Trait supported Type (Core.rs) using our Custom macro
+    // Gets a Suggested Transaction Parameter Algorand Protocol and Convert it to A Trait supported Type from (Core.rs) using our Custom macro
     fn suggested_transaction_params(_ctx, _args) {
         async move {
             let params = algod.txn_params().await.map(SuggestedTransactionParams::from);
             godot_unwrap!(params).to_variant()
         }
     }
-    /*
-    fn execute (_ctx, _args){
-        /*
-        async move {
-            atc.execute(algod);//.await.expect("Error");
-        }; */
-        //todo!()
-    }
-    */
+
     fn status(_ctx, _args) {
         async move {
             let status = algod.status().await;
@@ -479,9 +493,11 @@ asyncmethods!(algod, node, this,
 
     // Given a specific account public key, this call returns the accounts status, balance and spendable amounts
     fn account_information(_ctx, args) {
-        let address = args.read::<Address>().get().unwrap();
+        let address = args.read::<String>().get().unwrap();
         async move {
             let info = algod.account(&address).await;
+
+            //maps code output to a dictionay with custom godot unwrap macro and to_json_dict() method?
             godot_unwrap!(info).map(|info| to_json_dict(&info)).to_variant()
         }
     }
@@ -504,11 +520,13 @@ asyncmethods!(algod, node, this,
         }
     }
 
-    fn wait_for_transaction(_ctx, args) {
+    fn wait_for_block(_ctx, args) {
         let tx_id = args.read::<String>().get().unwrap();
 
+        // It implements the async function as within the class and calls it within this macro.
+        // clean and efficient
         async move {
-            let pending_tx = Algodot::wait_for_transaction(algod, RawTransaction200Response { tx_id }).await;
+            let pending_tx = Algodot::wait_for_block(algod, RawTransaction200Response { tx_id }).await;
             godot_unwrap!(pending_tx).map(|tx| to_json_dict(&tx)).to_variant()
         }
     }
@@ -533,28 +551,43 @@ asyncmethods!(algod, node, this,
     }
 
     fn construct_atc(ctx, args) {
+        // Get Params
         // Extract the arguments from `args` as needed
-        let params: SuggestedTransactionParams = args.read::<SuggestedTransactionParams>.get().unwrap();
-        let sender: Address = args.read::<Address>(1).unwrap();
-        let mnemonic: String = args.read::<String>(2).unwrap();
-        let app_id: u64 = args.read::<u64>(3).unwrap();
-        let _app_arguments: Option<String> = args.read::<Option<String>>(4).unwrap();
+        let params: SuggestedTransactionParams = args.read::<SuggestedTransactionParams>().get().unwrap();
 
+        // TO DO : Send String and Convert string to address for this params
+        let mut sender: String = args.read::<String>().get().unwrap(); // sender address
+
+        // secret key
+        let mnemonic: String = args.read::<String>().get().unwrap();
+
+        // app id
+        let app_id: u64 = args.read::<u64>().get().unwrap();
+
+        // app args
+        let _app_arguments: Option<String> = args.read::<Option<String>>().get().unwrap(); // Should ideally be Some()
+
+        // create atc no async
         let mut atc = escrowFoo::new_atc();
+        //let mut s
 
-        let mut _to_addr: [u8; 32] = escrowFoo::address_to_bytes(sender.to_string());
+        // convert address to bytes
+        let mut _to_addr: [u8; 32] = escrowFoo::address_to_bytes(sender.clone());
 
-        let _acct: OtherAccount = OtherAccount::from_mnemonic(&mnemonic).unwrap();
-        let mut _my_addr: OtherAddress = escrowFoo::address_to_address(&_acct.address().to_string());
+        // i probably couldnt clone account address thats why i wrote this sloppy code
+        //let _acct: OtherAccount = OtherAccount::from_mnemonic(&mnemonic).unwrap(); // Generate Account From Mnenomic
 
-        let pages: u32 = 0;
+        // sender address transmuted to  address from string and Address to Address
+        let mut _my_addr: OtherAddress = escrowFoo::address_to_address(&sender); //Generate Address String from address
+        let _arg2 = escrowFoo::address(_my_addr.clone());
+        let pages: u32 = 0; // no pages
 
         // Transaction details
         let details = escrowFoo {
             withdrw_amt: 0u32,
             withdrw_to_addr: _to_addr,
             arg1: escrowFoo::withdraw_amount(5000u32),
-            arg2: escrowFoo::address(_my_addr),
+            arg2: _arg2,
             _app_id: app_id,
             _escrow_address: escrowFoo::app_address(&app_id),
             atc: &atc,
@@ -567,7 +600,7 @@ asyncmethods!(algod, node, this,
             method: abiFoo::withdraw(), //abiFoo::deposit() to deposit
             method_args: vec![details.arg1, details.arg2],
             fee: escrowFoo::fee(2500),
-            sender: *sender,
+            sender: _my_addr, // Covert String Address TO Address Address
             suggested_params: k,
             on_complete: NoOp,
             approval_program: None,
@@ -578,21 +611,24 @@ asyncmethods!(algod, node, this,
             note: escrowFoo::note(0u32),
             lease: None,
             rekey_to: None,
-            signer: escrowFoo::basic_account(&mnemonic),
+            signer: escrowFoo::basic_account(&mnemonic),// Create A Txn Signer
         })
         .unwrap();
 
-        atc.build_group().expect("Error");
+        atc.build_group().expect("Error Building ATC Group");
 
+        let dict = Dictionary::new()
+        async move{
         // Execute the ATC
-        let result: ExecuteResult = atc.execute(&algod).expect("Error");
-
-        // Create a Godot dictionary to return results
-        let dict = Dictionary::new();
+        let result: ExecuteResult = atc.execute(&algod).await.expect("ATC Execute Error");
         dict.insert("confirmed round", result.confirmed_round);
         dict.insert("tx_ids", result.tx_ids);
-        dict.into()
-    }
+
+        //let p = to_json_dict(&result);
+        godot_unwrap!(dict).to_variant()
+
+
+    }}
 
 
 );
