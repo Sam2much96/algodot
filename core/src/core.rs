@@ -106,18 +106,19 @@ impl MyAccount {
 pub struct MySuggestedTransactionParams(SuggestedTransactionParams);
 
 //Godot Exposed TransactionParams for this project main and sub modules (abi) that satisfies all required Godot And Algonaut Trait Boud
+// COnvert SuggestedTransactionParams Struct To Dictionary
 impl ToVariant for MySuggestedTransactionParams {
     fn to_variant(&self) -> Variant {
         let dict = Dictionary::new();
-        dict.insert("genesis_id", &self.genesis_id);
-        dict.insert("first_valid", self.first_valid.0);
-        dict.insert("last_valid", self.last_valid.0);
-        dict.insert("consensus_version", &self.consensus_version);
-        dict.insert("min_fee", self.min_fee.0);
-        dict.insert("fee_per_byte", self.fee_per_byte.0);
+        dict.insert("genesis_id", &self.0.genesis_id);
+        dict.insert("first_valid", self.0.first_valid.0);
+        dict.insert("last_valid", self.0.last_valid.0);
+        dict.insert("consensus_version", &self.0.consensus_version);
+        dict.insert("min_fee", self.0.min_fee.0);
+        dict.insert("fee_per_byte", self.0.fee_per_byte.0);
         dict.insert(
             "genesis_hash",
-            PoolArray::<u8>::from_slice(&self.genesis_hash.0),
+            PoolArray::<u8>::from_slice(&self.0.genesis_hash.0),
         );
         dict.owned_to_variant()
     }
@@ -148,31 +149,31 @@ impl FromVariant for MySuggestedTransactionParams {
 impl From<MySuggestedTransactionParams> for algonaut::core::SuggestedTransactionParams {
     fn from(n: MySuggestedTransactionParams) -> algonaut::core::SuggestedTransactionParams {
         SuggestedTransactionParams {
-            genesis_id: n.genesis_id.clone(),
-            genesis_hash: n.genesis_hash,
-            consensus_version: n.consensus_version.clone(),
-            fee_per_byte: n.fee_per_byte,
+            genesis_id: n.0.genesis_id.clone(),
+            genesis_hash: n.0.genesis_hash,
+            consensus_version: n.0.consensus_version.clone(),
+            fee_per_byte: n.0.fee_per_byte,
             min_fee: MicroAlgos(2500),
-            first_valid: n.first_valid,
-            last_valid: n.last_valid,
+            first_valid: n.0.first_valid,
+            last_valid: n.0.last_valid,
         }
     }
 }
 impl TransactionParams for MySuggestedTransactionParams {
     fn last_round(&self) -> u64 {
-        self.last_valid.0
+        self.0.last_valid.0
     }
 
     fn min_fee(&self) -> u64 {
-        self.min_fee.0
+        self.0.min_fee.0
     }
 
     fn genesis_hash(&self) -> HashDigest {
-        self.genesis_hash.clone()
+        self.0.genesis_hash.clone()
     }
 
     fn genesis_id(&self) -> &String {
-        &self.genesis_id
+        &self.0.genesis_id
     }
 }
 //MySuggestedTransactionParams(SuggestedTransactionParams) is a tuple struct wraped arround Suggested Trans Params,
@@ -223,11 +224,11 @@ impl ToVariant for MyTransaction {
             match &self.txn_type {
                 //state machine prints to debug log : https://docs.rs/algonaut_transaction/0.4.2/algonaut_transaction/transaction/enum.TransactionType.html
                 TransactionType::Payment(payment) => {
-                    dict.insert("snd", MyAddress::from(payment.sender));
-                    dict.insert("rcv", MyAddress::from(payment.receiver));
+                    dict.insert("snd", &mut MyAddress::from(payment.sender));
+                    dict.insert("rcv", &mut MyAddress::from(payment.receiver));
                     dict.insert("amt", payment.amount.0);
                     if let Some(close) = payment.close_remainder_to {
-                        dict.insert("close", MyAddress::from(close))
+                        dict.insert("close", &mut MyAddress::from(close))
                     };
                     "pay"
                 }
@@ -260,13 +261,13 @@ impl ToVariant for MyTransaction {
                             apar.insert("au", url)
                         }
                         if let Some(clawback) = &params.clawback {
-                            apar.insert("c", MyAddress::from(*clawback))
+                            apar.insert("c", &mut MyAddress::from(*clawback))
                         }
                         if let Some(freeze) = &params.freeze {
                             apar.insert("f", MyAddress::from(*freeze))
                         }
                         if let Some(manager) = &params.manager {
-                            apar.insert("m", MyAddress::from(*manager))
+                            apar.insert("m", &mut MyAddress::from(*manager))
                         }
                         if let Some(reserve) = &params.reserve {
                             apar.insert("r", MyAddress::from(*reserve))
@@ -277,17 +278,17 @@ impl ToVariant for MyTransaction {
                 }
                 //https://docs.rs/algonaut_transaction/0.4.2/algonaut_transaction/transaction/struct.AssetTransferTransaction.html
                 TransactionType::AssetTransferTransaction(axfer) => {
-                    dict.insert("snd", MyAddress::from(axfer.sender));
+                    dict.insert("snd", &mut MyAddress::from(axfer.sender));
                     dict.insert("xaid", axfer.xfer);
                     dict.insert("aamt", axfer.amount);
-                    dict.insert("arcv", MyAddress::from(axfer.receiver));
+                    dict.insert("arcv", &mut MyAddress::from(axfer.receiver));
                     if let Some(close_to) = axfer.close_to {
-                        dict.insert("aclose", MyAddress::from(close_to));
+                        dict.insert("aclose", &mut MyAddress::from(close_to));
                     }
                     "axfer"
                 }
                 TransactionType::AssetAcceptTransaction(axfer) => {
-                    dict.insert("snd", MyAddress::from(axfer.sender));
+                    dict.insert("snd", &mut MyAddress::from(axfer.sender));
                     dict.insert("xaid", axfer.xfer);
                     "axfer"
                 }
@@ -305,7 +306,7 @@ impl ToVariant for MyTransaction {
                     dict.insert("app_id", appl.app_id);
                     dict.insert("app_arg", q);
                     dict.insert("txn", Dictionary::new());
-                    dict.insert("snd", MyAddress::from(appl.sender));
+                    dict.insert("snd", &mut MyAddress::from(appl.sender));
                     "appl"
                 }
                 TransactionType::AssetClawbackTransaction(_) => todo!(),
@@ -327,7 +328,7 @@ impl ToVariant for MyTransaction {
             dict.insert("note", PoolArray::<u8>::from_slice(note.as_slice()));
         }
         if let Some(rekey) = self.rekey_to {
-            dict.insert("rekey", MyAddress::from(rekey));
+            dict.insert("rekey", &mut MyAddress::from(rekey));
         }
         dict.owned_to_variant()
     }
