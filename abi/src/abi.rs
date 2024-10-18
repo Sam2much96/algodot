@@ -14,7 +14,7 @@ pub mod abi_smartcontract {
 
     */
 
-    use algonaut::abi::abi_interactions::AbiMethod;
+    use algonaut_abi::abi_interactions::AbiMethod;
     //use algonaut::abi::abi_type::AbiType;
     use gdnative::core_types::Variant;
     use gdnative::prelude::ToVariant;
@@ -144,9 +144,9 @@ pub mod atc {
 
 pub mod escrow {
 
-    use algonaut::abi::abi_type::AbiValue::Int;
-    use algonaut::core::Address;
-    use algonaut::core::{to_app_address, Address as OtherAddress, MicroAlgos};
+    use algonaut_abi::abi_type::AbiValue::Int;
+    use algonaut_core::Address;
+    use algonaut_core::{to_app_address, Address as OtherAddress, MicroAlgos};
     use algonaut::{
         atomic_transaction_composer::{AbiArgValue, AtomicTransactionComposer},
         //error::Error,
