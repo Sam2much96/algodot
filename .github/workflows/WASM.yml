@@ -59,7 +59,7 @@ jobs:
         run: |
           cd /home/runner/work/algodot/algodot
           
-          #Modify Cargo.toml for WASM & downgrade bumpalo module
+          #Modify Cargo.toml for WASM Compile
 
           sed -i '/^\[workspace\]/,/\]/ {
               r /dev/stdin
@@ -100,25 +100,17 @@ jobs:
           # check emscripten
           emcc -v
           
-       # `cargo check` command here will use installed `nightly`
-      # as it is set as an "override" for current directory
-
-      #- name: Run cargo check
-      #  uses: actions-rs/cargo@v1
-      #  with:
-      #    command: check
-          
       - name: "Compile & install Openssl 1.1l"
         run: |
-          # temporarily disabling for faster debugging
-          #sudo apt install make gcc -y
-          #wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
-          #tar -xzvf ${OPENSSL_VERSION}.tar.gz
           
-          #cd ${OPENSSL_VERSION}
-          #./config --prefix=/opt/openssl --openssldir=/usr/local/ssl
-          #make
-          #sudo make install
+          sudo apt install make gcc -y
+          wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
+          tar -xzvf ${OPENSSL_VERSION}.tar.gz
+          
+          cd ${OPENSSL_VERSION}
+          ./config --prefix=/opt/openssl --openssldir=/usr/local/ssl
+          make
+          sudo make install
           ls -al
           
       - name: "WASM and Emscripten SDK Setup"
@@ -128,15 +120,12 @@ jobs:
           # Downgrade Bumpalo Module for cargo build for Nightly Compile
            cargo update -p bumpalo@3.16.0 --precise 3.14.0
 
-          # Upgrade Ring Module to 0.17.5 for bleeding edge wasm compiles
-          # cargo update -p ring --precise 0.17.5
+   
 
           # Downgrading Ahash Module to Remove an unstable feature from the nightly build toolchain causing an error
            cargo update -p ahash --precise 0.8.9
 
-          # Install wasm pack and lock dependencies
-          #cargo install wasm-pack --locked
-
+          
           # Get the emsdk repo
           git clone https://github.com/emscripten-core/emsdk.git
 
@@ -180,3 +169,5 @@ jobs:
 
            # Compile and Build
            #CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack build --target no-modules
+           # Install wasm pack and lock dependencies
+           #cargo install wasm-pack --locked
