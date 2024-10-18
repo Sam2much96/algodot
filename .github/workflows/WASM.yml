@@ -27,7 +27,7 @@ env:
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION: openssl-1.1.1l
   TOOLCHAIN: nightly
-  TARGETS: wasm-unknown-emscripten
+  TARGETS: wasm-unknown-unknown
   
   
 jobs:
@@ -72,6 +72,7 @@ jobs:
           
           [lib]
           crate-type = ["cdylib"]
+          
           path = "algodot/src/algod/mod.rs"
           
           [dependencies]
@@ -147,7 +148,7 @@ jobs:
           #edit config.toml to build to target wasm emscripten
           cat <<EOT > .cargo/config.toml
           [build]
-          target = "wasm32-unknown-emscripten"
+          target = "wasm32-unknown-unknown"
           EOT
            
       - name: "WASM compile"
@@ -165,9 +166,5 @@ jobs:
            #RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
            
            # Build Command To Wasm
-           RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
+           RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-unknown --release
 
-           # Compile and Build
-           #CARGO_PROFILE_RELEASE_BUILD_OVERRIDE_DEBUG=true wasm-pack build --target no-modules
-           # Install wasm pack and lock dependencies
-           #cargo install wasm-pack --locked
