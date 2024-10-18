@@ -103,12 +103,21 @@ jobs:
           # Go to root dir
           cd && ls -al
           
+          #create config file
+          cd .cargo
+
+          #check Cargo Config
+          cat  config.toml
+
           #edit config.toml to build to target wasm emscripten
-          sed -i '$ a\[build]\n    target = "wasm32-unknown-emscripten"\n\n[target.wasm32-unknown-emscripten]\n\nrustflags = [\n    "-Clink-arg=-sSIDE_MODULE=2",\n    "-Zlink-native-libraries=no",\n    "-Cpanic=abort",\n]' /.cargo/config.toml
+          sed -i '$ a\[build]\n    target = "wasm32-unknown-emscripten"\n\n[target.wasm32-unknown-emscripten]\n\nrustflags = [\n    "-Clink-arg=-sSIDE_MODULE=2",\n    "-Zlink-native-libraries=no",\n    "-Cpanic=abort",\n]' config.toml
 
           
           #check Cargo Config
-          cat  /.cargo/config.toml
+          cat  config.toml
+
+          # Leave Cargo Dir
+          cd 
           
       - name: "Compile & install Openssl 1.1l"
         run: |
