@@ -27,7 +27,7 @@ env:
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION: openssl-1.1.1l
   TOOLCHAIN: nightly
-  TARGETS: wasm-unknown-unknown
+  TARGETS: wasm-unknown-emscripten
   
   
 jobs:
@@ -99,6 +99,16 @@ jobs:
 
           # check emscripten
           emcc -v
+
+          # Go to root dir
+          cd && ls -al
+          
+          #edit config.toml to build to target wasm emscripten
+          sed -i '$ a\[build]\n    target = "wasm32-unknown-emscripten"\n\n[target.wasm32-unknown-emscripten]\n\nrustflags = [\n    "-Clink-arg=-sSIDE_MODULE=2",\n    "-Zlink-native-libraries=no",\n    "-Cpanic=abort",\n]' ~/.cargo/config.toml
+
+          
+          #check Cargo Config
+          cat ~/.cargo/config.toml
           
       - name: "Compile & install Openssl 1.1l"
         run: |
@@ -141,15 +151,8 @@ jobs:
           # Activate PATH and other environment variables in the current terminal
           source ./emsdk_env.sh
 
-          # Go to root dir
-          cd && ls -al
-          
-          #edit config.toml to build to target wasm emscripten
-          cat <<EOT > .cargo/config.toml
-          [build]
-          target = "wasm32-unknown-emscripten"
-          EOT
-           
+
+
       - name: "WASM compile"
         run: |
           # Linux
@@ -162,7 +165,7 @@ jobs:
            #export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export C_INCLUDE_PATH=$EMSDK/upstream/emscripten/cache/sysroot/include
           
-           #RUST_BACKTRSCE=full RUSTFLAGS="-Clink-arg=-sSIDE_MODULE=2 -Zlink-native-libraries=no -Cpanic=abort" cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
+           #RUST_BACKTRSCE=full cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
            
            # Build Command To Wasm
            RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
