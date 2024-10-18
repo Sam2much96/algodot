@@ -107,11 +107,20 @@ jobs:
           cd .cargo
 
           #check Cargo Config
-          cat  config.toml
+          touch config.toml
 
           #edit config.toml to build to target wasm emscripten
-          sed -i '$ a\[build]\n    target = "wasm32-unknown-emscripten"\n\n[target.wasm32-unknown-emscripten]\n\nrustflags = [\n    "-Clink-arg=-sSIDE_MODULE=2",\n    "-Zlink-native-libraries=no",\n    "-Cpanic=abort",\n]' config.toml
+          cat <<EOT >> config.toml
+          [build]
+          target = "wasm32-unknown-emscripten"
 
+          [target.wasm32-unknown-emscripten]
+          rustflags = [
+              "-Clink-arg=-sSIDE_MODULE=2", # build a side module that Godot can load
+              "-Zlink-native-libraries=no", # workaround for a wasm-ld error during linking
+              "-Cpanic=abort", # workaround for a runtime error related to dyncalls
+          ]
+          EOT
           
           #check Cargo Config
           cat  config.toml
