@@ -24,13 +24,13 @@ use algodot_abi::escrow::Foo as escrowFoo;
 use algodot_core::*; // Godot Class Exposing Algonaut Core
 use algodot_macros::*; // Plugin Custom Macros
 use algonaut::algod::v2::Algod;
-use algonaut_core::{Address as OtherAddress, MicroAlgos}; //Round
-use algonaut_transaction::transaction::{
+use algonaut::core::{Address as OtherAddress, MicroAlgos}; //Round
+use algonaut::transaction::transaction::{
     ApplicationCallOnComplete::NoOp, AssetAcceptTransaction, AssetConfigurationTransaction,
     AssetParams, AssetTransferTransaction,
 };
-use algonaut_transaction::tx_group::TxGroup;
-use algonaut_transaction::{
+use algonaut::transaction::tx_group::TxGroup;
+use algonaut::transaction::{
     builder::CallApplication, Pay, TransactionType, TxnBuilder, //account::Account as OtherAccount,
 };
 use algonaut_algod::models::{PendingTransactionResponse, RawTransaction200Response};
