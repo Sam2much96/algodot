@@ -148,33 +148,23 @@ jobs:
       - name: "Fetch Precompiled Openssl 1.1.1l For WASM"
         run: |
 
-          # setup wasi env
-          sudo wget -qO- https://raw.githubusercontent.com/wasienv/wasienv/master/install.sh | sh
-
-
-          # Workspace Directory
-          ls -al
-          
-          # check compiler 
-          #emcc -v
           
           wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
 
           # download patch file
           wget https://github.com/Sam2much96/openssl-wasm/blob/main/openssl-1.1.1l.patch
-          patch -p0 < ${OPENSSL_VERSION}.patch
           
           cd ${OPENSSL_VERSION}
           
           
           
-          wasiconfigure ./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
+          emconfigure ./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
           
           sed -i -e "s/CNF_EX_LIBS=/CNF_EX_LIBS=-lwasi-emulated-mman -lwasi-emulated-signal /g" Makefile
 
           # build!
-          wasimake make
+          emake make
 
           ls -al
 
