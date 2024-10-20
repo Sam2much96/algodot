@@ -228,8 +228,8 @@ jobs:
            # Build Command To Wasm
            RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
 
-      - name: Upload Artifact openssl 64 bit
-        uses: actions/upload-artifact@v1
+      - name: Upload Artifact openssl and algodot
+        uses: actions/upload-artifact@v4
         with:
             name: "Openssl Wasm"
             compression-level: 9 # maximum compression
