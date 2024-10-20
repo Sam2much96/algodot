@@ -157,32 +157,32 @@ jobs:
           cd ${OPENSSL_VERSION}
 
           #Configure OpenSSL for Emscripten:
-          export CC=emcc
-          export CXX=emcc
+          source home/runner/work/algodot/algodot/emsdk/emsdk_env.sh
+          
           emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
 
           
           # Check Compiler For Errors
           #echo $CC
           #echo $CXX
-          #grep 'ememcc' Makefile
+          grep 'ememcc' Makefile
           
           # Compile
-          emmake make
+          #emmake make
 
           # Install
-          emmake make install
+          #emmake make install
 
           ls -al
           
           # copy compiled Assembly Files to sub directory
-          mkdir -p precompiled/lib
-          cp *.a precompiled/lib
+          #mkdir -p precompiled/lib
+          #cp *.a precompiled/lib
 
 
           # Copy Header Files
-          mkdir -p precompiled/include
-          cp -r include/openssl precompiled/include
+          #mkdir -p precompiled/include
+          #cp -r include/openssl precompiled/include
 
           
 
