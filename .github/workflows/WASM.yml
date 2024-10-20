@@ -148,7 +148,6 @@ jobs:
       - name: "Compile Openssl 1.1l For WASM"
         run: |
           
-          
           # Go To Workspace Dir
           cd ${{ github.workspace }}
 
@@ -165,7 +164,12 @@ jobs:
             --openssldir=/openssl-wasm \
             linux-generic32
 
-
+          
+          # Check Compiler For Errors
+          echo $CC
+          echo $CXX
+          grep 'ememcc' Makefile
+          
           # Compile
           emmake make
 
