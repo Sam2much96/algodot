@@ -13,7 +13,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
-  OPENSSL_VERSION: openssl-1.1.1l
+  OPENSSL_VERSION: openssl-3.3.2
   TOOLCHAIN: nightly
   TARGETS: wasm-unknown-emscripten
   
