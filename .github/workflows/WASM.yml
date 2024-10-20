@@ -83,7 +83,7 @@ jobs:
           # Check Toml file
           cat Cargo.toml && cd 
           sudo apt-get update -y
-          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross make gcc emscripten -y
+          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross make gcc emscripten libfindbin-libs-perl build-essential -y
 
           # check emscripten
           emcc -v
@@ -145,66 +145,38 @@ jobs:
           # Activate PATH and other environment variables in the current terminal
           source ./emsdk_env.sh
 
-      - name: "Compile ${OPENSSL_VERSION} For WASM"
+      - name: "Fetch Precompiled Openssl 1.1.1l For WASM"
         run: |
+
+          # setup wasi env
+          wget -qO- https://raw.githubusercontent.com/wasienv/wasienv/master/install.sh | sh
+
 
           # Workspace Directory
           ls -al
           
           # check compiler 
-          emcc -v
+          #emcc -v
           
           wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
+
+          # download patch file
+          wget https://github.com/Sam2much96/openssl-wasm/blob/main/openssl-1.1.1l.patch
+          patch -p0 < ${OPENSSL_VERSION}.patch
           
           cd ${OPENSSL_VERSION}
           
           
-          #Configure OpenSSL for Emscripten:
-          source ../emsdk/emsdk_env.sh
           
-          #emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
-          #emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw linux-generic32
-          #emconfigure ./config no-asm no-shared no-threads no-dso no-engine no-hw 
-
-          mkdir tmp
+          wasiconfigure ./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
           
-          export CC=emcc
-          export CXX=emcc
-          export LINK=${CXX}
-          export ARCH_FLAGS=""
-          export ARCH_LINK=""
-          export CPPFLAGS=" ${ARCH_FLAGS} "
-          export CXXFLAGS=" ${ARCH_FLAGS} "
-          export CFLAGS=" ${ARCH_FLAGS} "
-          export LDFLAGS=" ${ARCH_LINK} "
-          ./Configure wasm32-wasi --api=1.1.0 no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
+          sed -i -e "s/CNF_EX_LIBS=/CNF_EX_LIBS=-lwasi-emulated-mman -lwasi-emulated-signal /g" Makefile
 
-          emmake make
-          #PATH=$TOOLCHAIN_PATH:$PATH make
+          # build!
+          wasimake make
+
           ls -al
-
-          #cat Makefile
-
-          # Compile
-          #make
-
-          # Install
-          #make install
-
-          #ls -al
-          
-          # copy compiled Assembly Files to sub directory
-          mkdir -p precompiled/lib
-          mkdir -p precompiled/include
-          cp *.a precompiled/lib
-
-
-          # Copy Header Files
-          
-          cp -r include/openssl precompiled/include
-
-          
 
 
       - name: "WASM compile"
