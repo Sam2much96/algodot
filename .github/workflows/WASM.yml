@@ -166,17 +166,12 @@ jobs:
           
           emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
 
-          
-          # Check Compiler For Errors
-          #echo $CC
-          #echo $CXX
-          grep 'ememcc' Makefile
-          
+
           # Compile
-          #emmake make
+          emmake make
 
           # Install
-          #emmake make install
+          emmake make install
 
           ls -al
           
