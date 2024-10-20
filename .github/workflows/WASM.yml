@@ -128,7 +128,7 @@ jobs:
           # Leave Cargo Dir
           cd 
           
-      - name: "Compile & install Openssl 1.1l"
+      - name: "Compile Openssl 1.1l For WASM"
         run: |
           
           sudo apt install make gcc -y
@@ -136,10 +136,53 @@ jobs:
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
           
           cd ${OPENSSL_VERSION}
-          ./config --prefix=/opt/openssl --openssldir=/usr/local/ssl
-          make
-          sudo make install
-          ls -al
+
+
+          NPROCESSORS=$(getconf NPROCESSORS_ONLN 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null)
+
+          #cd openssl || exit 1
+
+          env \
+              CROSS_COMPILE="" \
+              AR="zig ar" \
+              RANLIB="zig ranlib" \
+              CC="zig cc --target=wasm32-wasi" \
+              CFLAGS="-Ofast -Werror -Qunused-arguments -Wno-shift-count-overflow" \
+              CPPFLAGS="$CPPFLAGS -D_BSD_SOURCE -D_WASI_EMULATED_GETPID -Dgetuid=getpagesize -Dgeteuid=getpagesize -Dgetgid=getpagesize -Dgetegid=getpagesize" \
+              CXXFLAGS="-Werror -Qunused-arguments -Wno-shift-count-overflow" \
+              LDFLAGS="-s -lwasi-emulated-getpid" \
+              ./Configure \
+              --banner="wasm32-wasi port" \
+              no-asm \
+              no-async \
+              no-egd \
+              no-ktls \
+              no-module \
+              no-posix-io \
+              no-secure-memory \
+              no-shared \
+              no-sock \
+              no-stdio \
+              no-thread-pool \
+              no-threads \
+              no-ui-console \
+              no-weak-ssl-ciphers \
+              wasm32-wasi || exit 1
+
+          make "-j${NPROCESSORS}"
+
+          cd - || exit 1
+
+          mkdir -p precompiled/lib
+          mv ${OPENSSL_VERSION}/*.a precompiled/lib
+
+          mkdir -p precompiled/include
+          cp -r ${OPENSSL_VERSION}/include/openssl precompiled/include
+
+          #./config --prefix=/opt/openssl --openssldir=/usr/local/ssl
+          ##make
+          ##sudo make install
+          ##ls -al
           
       - name: "WASM and Emscripten SDK Setup"
         run: |
@@ -180,11 +223,17 @@ jobs:
            export OPENSSL_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            
-           #export X86_64_UNKNOWN_LINUX_GNU_OPENSSL_LIB_DIR=${{ github.workspace }}/${OPENSSL_VERSION}
            export C_INCLUDE_PATH=$EMSDK/upstream/emscripten/cache/sysroot/include
           
-           #RUST_BACKTRSCE=full cargo +nightly-2023-01-27 build --target=wasm32-unknown-unknown
-           
            # Build Command To Wasm
            RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
 
+      - name: Upload Artifact openssl 64 bit
+              uses: actions/upload-artifact@v1
+              with:
+                name: "Openssl Wasm"
+                compression-level: 9 # maximum compression
+                path: |
+
+                ${{ github.workspace }}/${OPENSSL_VERSION}/precompiled/lib
+                ${{github.workspace}}/target/wasm32-unknown-emscripten
