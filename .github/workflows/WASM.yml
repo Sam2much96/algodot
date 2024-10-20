@@ -163,7 +163,7 @@ jobs:
               no-threads \
               no-ui-console \
               no-weak-ssl-ciphers \
-              wasm32-wasi || exit 1
+              wasm32-wasi 
 
           make "-j${NPROCESSORS}"
 
