@@ -140,7 +140,6 @@ jobs:
 
           NPROCESSORS=$(getconf NPROCESSORS_ONLN 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null)
 
-          #cd openssl || exit 1
 
           env \
               CROSS_COMPILE="" \
@@ -167,6 +166,7 @@ jobs:
 
           make "-j${NPROCESSORS}"
 
+          ls -al
           #cd - || exit 1
 
           # copy compiled Assembly Files
