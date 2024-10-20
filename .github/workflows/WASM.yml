@@ -178,7 +178,7 @@ jobs:
           export CXXFLAGS=" ${ARCH_FLAGS} "
           export CFLAGS=" ${ARCH_FLAGS} "
           export LDFLAGS=" ${ARCH_LINK} "
-          ./Configure linux-generic32 --openssldir=/tmp --api=1.1.0 no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
+          ./Configure wasm32-wasi --api=1.1.0 no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
 
           emmake make
           #PATH=$TOOLCHAIN_PATH:$PATH make
@@ -195,13 +195,14 @@ jobs:
           #ls -al
           
           # copy compiled Assembly Files to sub directory
-          #mkdir -p precompiled/lib
-          #cp *.a precompiled/lib
+          mkdir -p precompiled/lib
+          mkdir -p precompiled/include
+          cp *.a precompiled/lib
 
 
           # Copy Header Files
-          #mkdir -p precompiled/include
-          #cp -r include/openssl precompiled/include
+          
+          cp -r include/openssl precompiled/include
 
           
 
