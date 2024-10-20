@@ -165,7 +165,7 @@ jobs:
           
           #emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
           #emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw linux-generic32
-          emconfigure ./config no-asm no-shared no-threads no-dso no-engine no-hw linux-generic32
+          emconfigure ./config no-asm no-shared no-threads no-dso no-engine no-hw 
           
           ls -al
 
