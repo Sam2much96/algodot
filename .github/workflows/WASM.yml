@@ -157,18 +157,15 @@ jobs:
           cd ${OPENSSL_VERSION}
 
           #Configure OpenSSL for Emscripten:
-          
-          emconfigure ./Configure \
-            no-asm no-shared no-threads no-dso no-engine no-hw \
-            --prefix=/openssl-wasm \
-            --openssldir=/openssl-wasm \
-            linux-generic32
+          export CC=emcc
+          export CXX=emcc
+          emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
 
           
           # Check Compiler For Errors
-          echo $CC
-          echo $CXX
-          grep 'ememcc' Makefile
+          #echo $CC
+          #echo $CXX
+          #grep 'ememcc' Makefile
           
           # Compile
           emmake make
