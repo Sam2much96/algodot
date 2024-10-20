@@ -166,6 +166,8 @@ jobs:
           #emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
           #emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw linux-generic32
           #emconfigure ./config no-asm no-shared no-threads no-dso no-engine no-hw 
+
+          mkdir tmp
           
           export CC=emcc
           export CXX=emcc
@@ -176,11 +178,7 @@ jobs:
           export CXXFLAGS=" ${ARCH_FLAGS} "
           export CFLAGS=" ${ARCH_FLAGS} "
           export LDFLAGS=" ${ARCH_LINK} "
-          ./Configure \
-            purify \
-            --openssldir=/tmp \
-            --api=1.1.0 \
-            no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
+          ./Configure purify --openssldir=/tmp --api=1.1.0 no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
 
           emmake make
           #PATH=$TOOLCHAIN_PATH:$PATH make
