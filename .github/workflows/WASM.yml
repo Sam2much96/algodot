@@ -83,7 +83,7 @@ jobs:
           # Check Toml file
           cat Cargo.toml && cd 
           sudo apt-get update -y
-          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross emscripten
+          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross make gcc emscripten -y
 
           # check emscripten
           emcc -v
@@ -148,7 +148,6 @@ jobs:
       - name: "Compile Openssl 1.1l For WASM"
         run: |
           
-          sudo apt install make gcc -y
           
           # Go To Workspace Dir
           cd ${{ github.workspace }}
@@ -159,8 +158,7 @@ jobs:
           cd ${OPENSSL_VERSION}
 
           #Configure OpenSSL for Emscripten:
-          source ${{ github.workspace }}/emsdk/emsdk_env.sh
-
+          
           emconfigure ./Configure \
             no-asm no-shared no-threads no-dso no-engine no-hw \
             --prefix=/openssl-wasm \
