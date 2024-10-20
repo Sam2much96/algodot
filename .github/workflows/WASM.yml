@@ -182,7 +182,7 @@ jobs:
             purify \
             --openssldir=/tmp \
             --api=1.1.0 \
-            no-engine no-dso no-dgram no-sock no-srtp no-stdio no-ui no-err no-ocsp no-psk no-stdio no-ts
+            no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
           
           PATH=$TOOLCHAIN_PATH:$PATH make
           ls -al
