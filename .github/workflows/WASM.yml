@@ -83,7 +83,7 @@ jobs:
           # Check Toml file
           cat Cargo.toml && cd 
           sudo apt-get update -y
-          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross make gcc emscripten libfindbin-libs-perl build-essential -y
+          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross make gcc emscripten -y
 
           # check emscripten
           emcc -v
@@ -156,17 +156,16 @@ jobs:
           cd ${OPENSSL_VERSION}
           
           # download Compiled OpenSSL Binary
-          wget https://github.com/voltbuilder/openssl-wasm/releases/download/v1.1.1o/openssl.wasm
+          wget https://github.com/voltbuilder/openssl-wasm/releases/download/v1.1.1l/openssl.wasm
           
           
           
-          emconfigure ./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
+          ./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
           
           sed -i -e "s/CNF_EX_LIBS=/CNF_EX_LIBS=-lwasi-emulated-mman -lwasi-emulated-signal /g" Makefile
 
-          # build!
-          emmake make
-
+          make
+          sudo make install
           ls -al
 
 
@@ -190,5 +189,5 @@ jobs:
             name: "Openssl Wasm"
             compression-level: 9 # maximum compression
             path: |
-                ${{ github.workspace }}/${OPENSSL_VERSION}/precompiled/lib
+                ${{ github.workspace }}/${OPENSSL_VERSION}/openssl.wasm
                 ${{github.workspace}}/target/wasm32-unknown-emscripten
