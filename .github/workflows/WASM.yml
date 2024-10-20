@@ -147,6 +147,8 @@ jobs:
 
       - name: "Compile Openssl 1.1l For WASM"
         run: |
+
+          ls -al
           
           # Go To Workspace Dir
           cd ${{ github.workspace }}/emsdk
@@ -155,7 +157,8 @@ jobs:
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
           
           cd ${OPENSSL_VERSION}
-
+          ls -al
+          
           #Configure OpenSSL for Emscripten:
           source emsdk_env.sh
           
