@@ -135,7 +135,7 @@ jobs:
           wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
           
-          cd ${OPENSSL_VERSION}
+          cd ${OPENSSL_VERSION} || exit 1
 
 
           NPROCESSORS=$(getconf NPROCESSORS_ONLN 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null)
@@ -156,14 +156,10 @@ jobs:
               no-asm \
               no-async \
               no-egd \
-              no-ktls \
-              no-module \
               no-posix-io \
-              no-secure-memory \
               no-shared \
               no-sock \
               no-stdio \
-              no-thread-pool \
               no-threads \
               no-ui-console \
               no-weak-ssl-ciphers \
