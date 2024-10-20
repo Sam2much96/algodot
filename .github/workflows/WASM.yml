@@ -151,7 +151,7 @@ jobs:
               CPPFLAGS="$CPPFLAGS -D_BSD_SOURCE -D_WASI_EMULATED_GETPID -Dgetuid=getpagesize -Dgeteuid=getpagesize -Dgetgid=getpagesize -Dgetegid=getpagesize" \
               CXXFLAGS="-Werror -Qunused-arguments -Wno-shift-count-overflow" \
               LDFLAGS="-s -lwasi-emulated-getpid" \
-              ./Configure \
+              ./config --target=wasm32-wasi \
               --banner="wasm32-wasi port" \
               no-asm \
               no-async \
