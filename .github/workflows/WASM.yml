@@ -176,26 +176,25 @@ jobs:
           export CXXFLAGS=" ${ARCH_FLAGS} "
           export CFLAGS=" ${ARCH_FLAGS} "
           export LDFLAGS=" ${ARCH_LINK} "
-          #echo  $OSTYPE | grep -i darwin > /dev/null 2> /dev/null
-          ls -al
           ./Configure \
             purify \
             --openssldir=/tmp \
             --api=1.1.0 \
             no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
-          
-          PATH=$TOOLCHAIN_PATH:$PATH make
+
+          emmake make
+          #PATH=$TOOLCHAIN_PATH:$PATH make
           ls -al
 
           #cat Makefile
 
           # Compile
-          make
+          #make
 
           # Install
-          make install
+          #make install
 
-          ls -al
+          #ls -al
           
           # copy compiled Assembly Files to sub directory
           #mkdir -p precompiled/lib
