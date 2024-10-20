@@ -13,7 +13,7 @@ env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
-  OPENSSL_VERSION: openssl-3.3.2
+  OPENSSL_VERSION: openssl-1.1.1l
   TOOLCHAIN: nightly
   TARGETS: wasm-unknown-emscripten
   
@@ -152,10 +152,11 @@ jobs:
           wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
 
-          # download patch file
-          wget https://github.com/Sam2much96/openssl-wasm/blob/main/openssl-1.1.1l.patch
           
           cd ${OPENSSL_VERSION}
+          
+          # download Compiled OpenSSL Binary
+          wget https://github.com/voltbuilder/openssl-wasm/releases/download/v1.1.1o/openssl.wasm
           
           
           
@@ -164,7 +165,7 @@ jobs:
           sed -i -e "s/CNF_EX_LIBS=/CNF_EX_LIBS=-lwasi-emulated-mman -lwasi-emulated-signal /g" Makefile
 
           # build!
-          emake make
+          emmake make
 
           ls -al
 
