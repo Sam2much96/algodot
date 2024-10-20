@@ -149,7 +149,7 @@ jobs:
         run: |
           
           # Go To Workspace Dir
-          cd ${{ github.workspace }}
+          cd ${{ github.workspace }}/emsdk
 
           wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
@@ -157,7 +157,7 @@ jobs:
           cd ${OPENSSL_VERSION}
 
           #Configure OpenSSL for Emscripten:
-          source home/runner/work/algodot/algodot/emsdk/emsdk_env.sh
+          source emsdk_env.sh
           
           emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
 
