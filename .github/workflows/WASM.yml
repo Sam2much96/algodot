@@ -176,8 +176,8 @@ jobs:
           export CXXFLAGS=" ${ARCH_FLAGS} "
           export CFLAGS=" ${ARCH_FLAGS} "
           export LDFLAGS=" ${ARCH_LINK} "
-          echo  $OSTYPE | grep -i darwin > /dev/null 2> /dev/null
-          
+          #echo  $OSTYPE | grep -i darwin > /dev/null 2> /dev/null
+          ls -al
           ./Configure \
             purify \
             --openssldir=/tmp \
