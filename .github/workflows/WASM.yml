@@ -149,7 +149,7 @@ jobs:
         run: |
 
           # setup wasi env
-          wget -qO- https://raw.githubusercontent.com/wasienv/wasienv/master/install.sh | sh
+          sudo wget -qO- https://raw.githubusercontent.com/wasienv/wasienv/master/install.sh | sh
 
 
           # Workspace Directory
