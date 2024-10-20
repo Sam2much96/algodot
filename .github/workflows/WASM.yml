@@ -145,7 +145,7 @@ jobs:
           # Activate PATH and other environment variables in the current terminal
           source ./emsdk_env.sh
 
-      - name: "Compile Openssl 1.1l For WASM"
+      - name: "Compile ${OPENSSL_VERSION} For WASM"
         run: |
 
           # Workspace Directory
@@ -178,7 +178,7 @@ jobs:
           export CXXFLAGS=" ${ARCH_FLAGS} "
           export CFLAGS=" ${ARCH_FLAGS} "
           export LDFLAGS=" ${ARCH_LINK} "
-          ./Configure wasm32 --api=1.1.0 no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
+          ./Configure wasm32-wasi --api=1.1.0 no-engine no-dso no-dgram no-sock no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts
 
           emmake make
           #PATH=$TOOLCHAIN_PATH:$PATH make
