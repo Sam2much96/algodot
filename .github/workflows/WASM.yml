@@ -164,7 +164,7 @@ jobs:
           source ../emsdk/emsdk_env.sh
           
           #emconfigure ./Configure no-asm no-shared no-threads no-dso no-engine no-hw --prefix=/openssl-wasm --openssldir=/openssl-wasm linux-generic32
-          emconfigure ./Configure
+          emconfigure ./configure
           ls -al
 
           # Compile
