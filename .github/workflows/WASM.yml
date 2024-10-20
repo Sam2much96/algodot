@@ -167,11 +167,13 @@ jobs:
 
           make "-j${NPROCESSORS}"
 
-          cd - || exit 1
+          #cd - || exit 1
 
+          # copy compiled Assembly Files
           mkdir -p precompiled/lib
           mv ${OPENSSL_VERSION}/*.a precompiled/lib
 
+          # Copy Header Files
           mkdir -p precompiled/include
           cp -r ${OPENSSL_VERSION}/include/openssl precompiled/include
 
