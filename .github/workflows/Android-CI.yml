@@ -28,14 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nttld/setup-ndk@v1
         with:
           ref: "Godot-3.5-DEV"
-          ndk-version: r23c
-          add-to-path: false
-      - run: ./build.sh
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          
           
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
@@ -51,13 +46,20 @@ jobs:
           command: check
           
       - name: "Install Java + NDK 23 " #Godot's Suppported NDK https://github.com/godotengine/godot/blob/master/platform/android/java/app/config.gradle
-        run: |
+      - uses: nttld/setup-ndk@v1
+        with: 
+          ndk-version: r23c
+          add-to-path: false
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          
+      - run: |
           ls /usr/local/lib/android/sdk/ndk
           ls /usr/local/lib/android/sdk/ndk
 
           # Remove Newer NDK's
-          rm -rf /usr/local/lib/android/sdk/ndk/27.*
-          rm -rf /usr/local/lib/android/sdk/ndk/26.*
+          # rm -rf /usr/local/lib/android/sdk/ndk/27.*
+          # rm -rf /usr/local/lib/android/sdk/ndk/26.*
 
           # Get NDK 23
           #wget "https://dl.google.com/android/repository/android-ndk-r23c-linux.zip"
@@ -74,7 +76,7 @@ jobs:
           #export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/android-ndk-r23c
           
           # reload Shell
-          source ~/.bashrc  # or ~/.zshrc if you're using Zsh
+          # source ~/.bashrc  # or ~/.zshrc if you're using Zsh
 
           #verify NDK version
           # $ANDROID_NDK_HOME/ndk-build --version
