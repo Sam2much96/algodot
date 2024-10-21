@@ -382,7 +382,7 @@ jobs:
          uses: thedoctor0/zip-release@master
          with:
             filename: android.zip
-            path: ~/android/algodot
+            path: /home/runner/android/algodot
             type: zip
        
        - name: Butler Publish
