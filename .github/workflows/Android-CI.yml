@@ -2,37 +2,35 @@ name: Android CI
 
 on:
   push:
-    branches : [Godot-3.5-DEV]
+    branches: [Godot-3.5-DEV]
   schedule:
-    # * is a special character in YAML so you have to quote this string
-    # DOcumentation : https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
-    - cron:  '30 5,17 * * *'
-  
-    
+    - cron: '30 5,17 * * *'
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
-  OPENSSL_VERSION : openssl-1.1.1l
+  OPENSSL_VERSION: openssl-1.1.1l
 
-  
-jobs:       
-  build-android-arm:
+jobs:
+  build-android:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: 
+          - armeabi-v7a
+          - arm64-v8a
     steps:
       - uses: actions/checkout@v4
         with:
           ref: "Godot-3.5-DEV"
+          
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1.0.4
         with:
-            toolchain: nightly
-            override: true
-            components: rustfmt, clippy
-            target: armeabi-v7a arm64-v8a
-            
-       # `cargo check` command here will use installed `nightly`
-      # as it is set as an "override" for current directory
+          toolchain: nightly
+          override: true
+          components: rustfmt, clippy
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1.0.1
@@ -41,327 +39,81 @@ jobs:
           
       - name: "Install Java + NDK"
         run: |
-          # aarch64 and armv7 cover most Android phones & tablets.
           rustup target add aarch64-linux-android armv7-linux-androideabi
           sudo apt-get update
           sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross
-      # Relies on ls listing alphabetically, NDK versions having fixed
-      # digits, and the folder not containing any other files
+
       - name: "Find highest Android NDK version"
         run: |
           highestNdk=$(ls $ANDROID_SDK_ROOT/ndk | tail -n1)
           echo "Highest Android NDK: $highestNdk"
           echo "ANDROID_NDK_VERSION=$highestNdk" >> $GITHUB_ENV
-      # See https://github.com/godot-rust/godot-rust/pull/920
-      - name: "Found version ${{ env.ANDROID_NDK_VERSION }}. Workaround Rust bug..."
+
+      - name: "Workaround Rust bug with NDK version ${{ env.ANDROID_NDK_VERSION }}"
         run: >
           find -L $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION -name libunwind.a
           -execdir sh -c 'echo "INPUT(-lunwind)" > libgcc.a' \;
-      
-      
-      - name: "Build OpenSSL for arm with Bash"
+
+      - name: "Build OpenSSL for ${{ matrix.target }}"
         run: |
-        
           if [[ -z "${ANDROID_NDK_HOME}" ]]; then
-            # need change
             export ANDROID_NDK_HOME=~/Android/Sdk/ndk/${{ env.ANDROID_NDK_VERSION }}
-          else
-            echo "Use environment variable ANDROID_NDK_HOME is: $ANDROID_NDK_HOME"
           fi
-          sleep 3
-          # need change
+          wget "https://www.openssl.org/source/${{ env.OPENSSL_VERSION }}.tar.gz"
+          tar xfz "${{ env.OPENSSL_VERSION }}.tar.gz"
+
+          PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+
+          ./Configure android-${{ matrix.target }} -D__ANDROID_API__=21 shared no-asm
+          make -j8
+
+          mkdir -p openssl_android/${{ matrix.target }}
+          cp libcrypto.a openssl_android/${{ matrix.target }}/libcrypto.a
+          cp libssl.a openssl_android/${{ matrix.target }}/libssl.a
+          cp libcrypto.so openssl_android/${{ matrix.target }}/libcrypto.so
+          cp libssl.so openssl_android/${{ matrix.target }}/libssl.so
+          cp -a include openssl_android/${{ matrix.target }}/include
           
-          #curl -O "https://www.openssl.org/source/${{env.OPENSSL_VERSION}}.tar.gz"
-          wget "https://www.openssl.org/source/${{env.OPENSSL_VERSION}}.tar.gz"
-
-
-          PROJECT_HOME=`pwd`
-          PATH_ORG=$PATH
-          export OUTPUT_DIR=${{ github.workspace }}/openssl_android
-
-          # Clean output:
-          sudo rm -rf $OUTPUT_DIR
-          sudo mkdir $OUTPUT_DIR
-
-          build_android_clang() {
-            rm -rf ${OPENSSL_VERSION}
-            tar xfz "${OPENSSL_VERSION}.tar.gz"
-
-            echo ""
-            echo "----- B
-          # Clean output:uild libcrypto & libssl.so for "$2" -----"
-            echo ""
-
-            ANDROID_API=$1
-            CONFIGURE_PLATFORM=$2
-            ARCHITECTURE=$CONFIGURE_PLATFORM
-
-            # Clean openssl:
-            cd "${OPENSSL_VERSION}"
-            #make clean
-
-            # Build openssl libraries
-            #perl -pi -w -e 's/\-mandroid//g;' ./Configure
-            PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-            #turn off warning  macro-redefined
-            # export CFLAGS="-Wno-macro-redefined -O3"
-            ./Configure  $CONFIGURE_PLATFORM -D__ANDROID_API__=$ANDROID_API shared threads no-asm no-sse2 no-ssl2 no-ssl3 no-comp no-hw no-engine
-
-                make build_libs -j8
-            sudo mkdir -p ../$OUTPUT_DIR/${ARCHITECTURE}/
-
-                file libcrypto.so
-                file libssl.so
-
-                sudo cp libcrypto.a $OUTPUT_DIR/libcrypto.a
-            sudo cp libssl.a $OUTPUT_DIR/libssl.a
-            sudo cp libcrypto.so $OUTPUT_DIR/libcrypto.so
-            sudo cp libssl.so $OUTPUT_DIR/libssl.so
-            
-            sudo cp -a include $OUTPUT_DIR
-            
-            ls -al
-            
-            cd ..
-            echo "Parent Dir"
-            ls -al
-            
-            echo "openssl_android Dir"
-            cd openssl_android && ls -al
-          }
-
-          # Build libcrypto for armeabi-v7a 
-          build_android_clang  "21"    	"android-arm" #32 bit arm
-          #build_android_clang  "21"    	"android-x86"
-          #build_android_clang  "21"    	"android-arm64"
-
-          exit 0
-
-          
-       
-          
+      - name: "Upload OpenSSL for ${{ matrix.target }}"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "OpenSSL dependencies ${{ matrix.target }}"
+          path: openssl_android/${{ matrix.target }}
           
       - name: "Install Rust NDK"
+        run: cargo install cargo-ndk
+
+      - name: "Build Rust for target ${{ matrix.target }}"
         run: |
-          cargo install cargo-ndk
+          export CARGO_TARGET_${{ matrix.target | to_upper }}_LINUX_ANDROID_LINKER=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/${{ matrix.target }}-linux-android21-clang++
+          cargo ndk -t ${{ matrix.target }} -o ./jniLibs build --release
           
-      - name: "Check workspace"
-        run: |
-         #copy openssl shared libraries and headers to compiler working directory
-         #sudo cp -a ${{ github.workspace }}/openssl_android/openssl-1.1.1l/include ${{ github.workspace }}/openssl_android
-         
-         #verify all files
-         cd ${{ github.workspace }}/openssl_android && ls -al
-      
-      
-      - name: Upload Artifact openssl 32 bit
+      - name: "Upload Rust artifact for ${{ matrix.target }}"
         uses: actions/upload-artifact@v4
         with:
-          name: "Openssl dependencies arm-v7a"
-          path: openssl_android
-      
-      - name: "Build Rust for targets with Bash: armv7-linux-androideabi" # aarch64-linux-android
-        run: |
-          
-        
-          #link external libraries
-          export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++
-          export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang++
-          
-          
-          #export ARMV7_LINUX_ANDROIDEABI_OPENSSL_LIB_DIR="openssl_android/libs/android/clang/android-arm/ssl" #buggy
-          
-          export OPENSSL=${{ github.workspace }}/openssl_android #arm
-          
-          export OPENSSL_LIB_DIR=${{ github.workspace }}/openssl_android
-          export PKG_CONFIG_PATH=${{ github.workspace }}/openssl_android
-          
-          export ARMV7_LINUX_ANDROIDEABI_OPENSSL_DIR=${{ github.workspace }}/openssl_android
-          
-          
-          PKG_CONFIG_ALLOW_CROSS_armv7_linux_androideabi=1
-          
-         
-          export ANDROID_NDK_VERSION=${{ env.ANDROID_NDK_VERSION }}
-
-          export OPENSSL_DIR=${{ github.workspace }}
-          export TOOLCHAIN=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64
-
-          export TARGET=armeabi-v7a
-
-
-          export DEBUG= true
-
-          
-          cargo ndk -t armeabi-v7a  -o ./jniLibs build --release
-          
-          #cargo build --target aarch64-linux-android --release
-          #cargo build --target armv7-linux-androideabi --release 
-          
-      - name: Upload Artifact 1
-        uses: actions/upload-artifact@v4
-        with:
-          name: "android armabi-v7a"
-          path: target/armv7-linux-androideabi/release/libalgodot.so
-        
-      - name: "Build OpenSSL for arm64 with Bash"
-        run: |
-        
-          if [[ -z "${ANDROID_NDK_HOME}" ]]; then
-            # need change
-            export ANDROID_NDK_HOME=~/Android/Sdk/ndk/${{ env.ANDROID_NDK_VERSION }}
-          else
-            echo "Use environment variable ANDROID_NDK_HOME is: $ANDROID_NDK_HOME"
-          fi
-          sleep 3
-          # need change
-          export OPENSSL_VERSION="openssl-1.1.1l"
-          wget "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
-
-
-          PROJECT_HOME=`pwd`
-          PATH_ORG=$PATH
-          export OUTPUT_DIR=${{ github.workspace }}/openssl_android
-
-          # Clean output:
-          sudo rm -rf $OUTPUT_DIR
-          sudo mkdir $OUTPUT_DIR
-
-          build_android_clang() {
-            rm -rf ${OPENSSL_VERSION}
-            tar xfz "${OPENSSL_VERSION}.tar.gz"
-
-            echo ""
-            echo "----- B
-          # Clean output:uild libcrypto & libssl.so for "$2" -----"
-            echo ""
-
-            ANDROID_API=$1
-            CONFIGURE_PLATFORM=$2
-            ARCHITECTURE=$CONFIGURE_PLATFORM
-
-            # Clean openssl:
-            cd "${OPENSSL_VERSION}"
-            #make clean
-
-            # Build openssl libraries
-            #perl -pi -w -e 's/\-mandroid//g;' ./Configure
-            PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-            #turn off warning  macro-redefined
-            # export CFLAGS="-Wno-macro-redefined -O3"
-            ./Configure  $CONFIGURE_PLATFORM -D__ANDROID_API__=$ANDROID_API shared threads no-asm no-sse2 no-ssl2 no-ssl3 no-comp no-hw no-engine
-
-                make build_libs -j8
-            sudo mkdir -p ../$OUTPUT_DIR/${ARCHITECTURE}/
-
-                file libcrypto.so
-                file libssl.so
-
-                sudo cp libcrypto.a $OUTPUT_DIR/libcrypto.a
-            sudo cp libssl.a $OUTPUT_DIR/libssl.a
-            sudo cp libcrypto.so $OUTPUT_DIR/libcrypto.so
-            sudo cp libssl.so $OUTPUT_DIR/libssl.so
-            
-            sudo cp -a include $OUTPUT_DIR
-            
-            ls -al
-            
-            cd ..
-            echo "Parent Dir"
-            ls -al
-            
-            echo "openssl_android Dir"
-            cd openssl_android && ls -al
-          }
-
-          # Build libcrypto for armeabi-v7a 
-          #build_android_clang  "21"    	"android-arm" #32 bit arm
-          #build_android_clang  "21"    	"android-x86"
-          build_android_clang  "21"    	"android-arm64"
-
-          exit 0
-         
-      - name: "Check workspace"
-        run: |
-         #copy openssl shared libraries and headers to compiler working directory
-         #sudo cp -a ${{ github.workspace }}/openssl_android/openssl-1.1.1l/include ${{ github.workspace }}/openssl_android
-         
-         #verify all files
-         cd ${{ github.workspace }}/openssl_android && ls -al
-         
-      
-      - name: Upload Artifact openssl 64 bit
-        uses: actions/upload-artifact@v4
-        with:
-          name: "Openssl dependencies arm64-v8a"
-          path: openssl_android
-         
-      
-      
-      
-      - name: "Build Rust for targets with Bash: armv8-linux-androideabi" # aarch64-linux-android
-        run: |
-          
-        
-          #link external libraries
-          export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++
-          export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi21-clang++
-          
-          
-          
-          export OPENSSL=${{ github.workspace }}/openssl_android #arm64
-          
-          export OPENSSL_LIB_DIR=${{ github.workspace }}/openssl_android
-          export PKG_CONFIG_PATH=${{ github.workspace }}/openssl_android
-          
-          export AARCH64_LINUX_ANDROID_OPENSSL_LIB_DIR=${{ github.workspace }}/openssl_android
-            
-         
-          export ANDROID_NDK_VERSION=${{ env.ANDROID_NDK_VERSION }}
-
-          export OPENSSL_DIR=${{ github.workspace }}/openssl_android
-          export TOOLCHAIN=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64
-
-          export TARGET=arm64-v8a
-
-
-          export DEBUG= true
-
-          
-          cargo ndk -t arm64-v8a  -o ./jniLibs build --release
-         
-          
-      - name: Upload Artifact 2
-        uses: actions/upload-artifact@v4
-        with:
-          name: "android arm64-v8a"
-          path: target/aarch64-linux-android/release/libalgodot.so
-
+          name: "android ${{ matrix.target }}"
+          path: target/${{ matrix.target }}-linux-android/release/libalgodot.so
 
   Itch_io:
-      runs-on: ubuntu-22.04
-      needs: build-android-arm
-      steps:
-       - name: Download content
-         uses: actions/download-artifact@v4
-         with: 
-           name: linux
-  
-       
-       - name: Archive site content
-         uses: thedoctor0/zip-release@master
-         with:
-            filename: site.zip
-       
-       - name: Butler Publish
-         uses: manleydev/butler-publish-itchio-action@master
-         env:
-           BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
-           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-           CHANNEL: linux
-           ITCH_GAME: dystopia-app
-           ITCH_USER: inhumanity-arts
-           PACKAGE: ./site.zip
-        
-  
-        
+    runs-on: ubuntu-22.04
+    needs: build-android
+    steps:
+      - name: Download content
+        uses: actions/download-artifact@v4
+        with:
+          name: linux
+
+      - name: Archive site content
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: site.zip
+
+      - name: Butler Publish
+        uses: manleydev/butler-publish-itchio-action@master
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          CHANNEL: linux
+          ITCH_GAME: dystopia-app
+          ITCH_USER: inhumanity-arts
+          PACKAGE: ./site.zip
