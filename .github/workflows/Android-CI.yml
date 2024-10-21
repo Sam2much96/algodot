@@ -20,7 +20,8 @@ env:
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION : openssl-1.1.1l
-  ANDROID_NDK_VERSION : '23.2.8568313'
+  ANDROID_NDK_VERSION : android-ndk-r23c
+  ANDROID_NDK_VERSION_DEBUG : '23.2.8568313'
   ANDROID_NDK_HOME : /usr/local/lib/android/sdk/ndk/android-ndk-r23c
   
 jobs:       
