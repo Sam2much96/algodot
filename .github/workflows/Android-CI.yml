@@ -34,7 +34,7 @@ jobs:
         with:
             toolchain: nightly
             override: true
-            components: rustfmt, clippy, cargo-ndk
+            components: rustfmt, clippy
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1.0.1
@@ -47,7 +47,7 @@ jobs:
           
           sudo apt-get update
           sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross
-
+          cargo install cargo-ndk
       
       - name: "Find highest Android NDK version"
         run: |
