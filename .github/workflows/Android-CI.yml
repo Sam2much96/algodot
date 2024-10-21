@@ -64,7 +64,7 @@ jobs:
           mv android-ndk-r23* /usr/local/lib/android/sdk/ndk/
 
           #set ndk in my env
-          export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/android-ndk-r23b
+          export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/android-ndk-r23c
           
           # reload Shell
           source ~/.bashrc  # or ~/.zshrc if you're using Zsh
