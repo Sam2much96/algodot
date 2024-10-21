@@ -20,7 +20,9 @@ jobs:
   build-android-arm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          ref: "Godot-3.5-DEV"
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -32,7 +34,7 @@ jobs:
       # as it is set as an "override" for current directory
 
       - name: Run cargo check
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v4
         with:
           command: check
           
@@ -151,7 +153,7 @@ jobs:
       
       
       - name: Upload Artifact openssl 32 bit
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: "Openssl dependencies arm-v7a"
           path: openssl_android
@@ -195,7 +197,7 @@ jobs:
           #cargo build --target armv7-linux-androideabi --release 
           
       - name: Upload Artifact 1
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: "android armabi-v7a"
           path: target/armv7-linux-androideabi/release/libalgodot.so
@@ -287,7 +289,7 @@ jobs:
          
       
       - name: Upload Artifact openssl 64 bit
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: "Openssl dependencies arm64-v8a"
           path: openssl_android
