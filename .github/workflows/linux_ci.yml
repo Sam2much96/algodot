@@ -2,9 +2,8 @@ name: Linux CI
 
 on:
   push:
-    branches: [ TESTNET ]
-  pull_request:
-    branches: [ TESTNET ]
+    branches: [ Godot-3.5-DEV ]
+
     
 env:
   CARGO_TERM_COLOR: always
@@ -55,6 +54,10 @@ jobs:
           ./config --prefix=/opt/openssl --openssldir=/usr/local/ssl
           make
           sudo make install
+
+          # Copy out OpenSSL Libs
+
+          ls -al
              
       - name: "Linux compile"
         run: |
@@ -80,4 +83,27 @@ jobs:
         with: 
           name: linux
           
-    
+  Itch_io:
+      runs-on: ubuntu-22.04
+      needs: build-linux
+      steps:
+       - name: Download content
+         uses: actions/download-artifact@v4
+         with: 
+           name: linux
+  
+       
+       - name: Archive site content
+         uses: thedoctor0/zip-release@master
+         with:
+            filename: site.zip
+       
+       - name: Butler Publish
+         uses: manleydev/butler-publish-itchio-action@master
+         env:
+           BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+           CHANNEL: linux
+           ITCH_GAME: Algodot
+           ITCH_USER: inhumanity-arts
+           PACKAGE: ./site.zip
