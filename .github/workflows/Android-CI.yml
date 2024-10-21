@@ -34,11 +34,7 @@ jobs:
         with:
             toolchain: nightly
             override: true
-            components: rustfmt, clippy
-            targets: arm64-v8a,armeabi-v7a, armv7-linux-androideabi
-            
-       # `cargo check` command here will use installed `nightly`
-      # as it is set as an "override" for current directory
+            components: rustfmt, clippy, cargo-ndk
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1.0.1
@@ -47,17 +43,18 @@ jobs:
           
       - name: "Install Java + NDK"
         run: |
-          # aarch64 and armv7 cover most Android phones & tablets.
-          rustup target add aarch64-linux-android armv7-linux-androideabi
+          
+          
           sudo apt-get update
           sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross
-      # Relies on ls listing alphabetically, NDK versions having fixed
-      # digits, and the folder not containing any other files
+
+      
       - name: "Find highest Android NDK version"
         run: |
           highestNdk=$(ls $ANDROID_SDK_ROOT/ndk | tail -n1)
           echo "Highest Android NDK: $highestNdk"
           echo "ANDROID_NDK_VERSION=$highestNdk" >> $GITHUB_ENV
+      
       # See https://github.com/godot-rust/godot-rust/pull/920
       - name: "Found version ${{ env.ANDROID_NDK_VERSION }}. Workaround Rust bug..."
         run: >
@@ -146,10 +143,7 @@ jobs:
           
        
           
-          
-      - name: "Install Rust NDK"
-        run: |
-          cargo install cargo-ndk
+        
           
       - name: "Check workspace"
         run: |
@@ -168,7 +162,7 @@ jobs:
       
       - name: "Build Rust for targets with Bash: armv7-linux-androideabi" # aarch64-linux-android
         run: |
-          
+          rustup target add armv7-linux-androideabi  
         
           #link external libraries
           export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++
@@ -305,9 +299,9 @@ jobs:
       
       
       
-      - name: "Build Rust for targets with Bash: armv8-linux-androideabi" # aarch64-linux-android
+      - name: "Build Rust for targets with Bash: aarch64-linux-android" # aarch64-linux-android
         run: |
-          
+          rustup target add aarch64-linux-android 
         
           #link external libraries
           export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++
