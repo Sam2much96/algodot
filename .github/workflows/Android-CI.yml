@@ -21,7 +21,7 @@ env:
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION : openssl-1.1.1l
   ANDROID_NDK_VERSION : '23.2.8568313'
-  
+  ANDROID_NDK_HOME : /usr/local/lib/android/sdk/ndk/android-ndk-r23c
   
 jobs:       
   build-android-arm:
@@ -66,7 +66,7 @@ jobs:
           mv android-ndk-r23* /usr/local/lib/android/sdk/ndk/
 
           #set ndk in my env
-          export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/android-ndk-r23c
+          #export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/android-ndk-r23c
           
           # reload Shell
           source ~/.bashrc  # or ~/.zshrc if you're using Zsh
