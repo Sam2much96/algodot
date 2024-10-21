@@ -24,11 +24,12 @@ jobs:
         with:
           ref: "Godot-3.5-DEV"
       - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
+        uses: actions-rs/toolchain@v1.0.4
         with:
             toolchain: nightly
             override: true
             components: rustfmt, clippy
+            target: armeabi-v7a arm64-v8a
             
        # `cargo check` command here will use installed `nightly`
       # as it is set as an "override" for current directory
@@ -215,7 +216,7 @@ jobs:
           sleep 3
           # need change
           export OPENSSL_VERSION="openssl-1.1.1l"
-          curl -O "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
+          wget "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
 
 
           PROJECT_HOME=`pwd`
