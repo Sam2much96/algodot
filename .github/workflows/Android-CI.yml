@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: "Godot-3.5-TESTNET"
+          ref: "Godot-3.5-DEV"
       - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
@@ -55,12 +55,6 @@ jobs:
           highestNdk=$(ls $ANDROID_SDK_ROOT/ndk | tail -n1)
           echo "Highest Android NDK: $highestNdk"
           echo "ANDROID_NDK_VERSION=$highestNdk" >> $GITHUB_ENV
-      
-      # See https://github.com/godot-rust/godot-rust/pull/920
-      - name: "Found version ${{ env.ANDROID_NDK_VERSION }}. Workaround Rust bug..."
-        run: >
-          find -L $ANDROID_SDK_ROOT/ndk/$ANDROID_NDK_VERSION -name libunwind.a
-          -execdir sh -c 'echo "INPUT(-lunwind)" > libgcc.a' \;
       
       
       - name: "Build OpenSSL for arm with Bash"
