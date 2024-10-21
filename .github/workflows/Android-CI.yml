@@ -52,6 +52,10 @@ jobs:
       
       - name: "Find highest Android NDK version"
         run: |
+          # Godot Still Uses NDK 23
+          # Check Available NDK
+          ls $ANDROID_SDK_ROOT/ndk
+        
           highestNdk=$(ls $ANDROID_SDK_ROOT/ndk | tail -n1)
           echo "Highest Android NDK: $highestNdk"
           echo "ANDROID_NDK_VERSION=$highestNdk" >> $GITHUB_ENV
