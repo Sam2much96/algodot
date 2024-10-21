@@ -20,11 +20,12 @@ env:
   RUST_BACKTRACE: 1
   CARGO_INCREMENTAL: 0
   OPENSSL_VERSION : openssl-1.1.1l
+  ANDROID_NDK_VERSION : '23.2.8568313'
 
   
 jobs:       
   build-android-arm:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v4
         with:
