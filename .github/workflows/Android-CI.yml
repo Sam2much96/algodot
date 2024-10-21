@@ -70,7 +70,8 @@ jobs:
           sleep 3
           # need change
           
-          curl -O "https://www.openssl.org/source/${{env.OPENSSL_VERSION}}.tar.gz"
+          #curl -O "https://www.openssl.org/source/${{env.OPENSSL_VERSION}}.tar.gz"
+          wget "https://www.openssl.org/source/${{env.OPENSSL_VERSION}}.tar.gz"
 
 
           PROJECT_HOME=`pwd`
