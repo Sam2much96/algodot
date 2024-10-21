@@ -57,6 +57,10 @@ jobs:
           name = "Algodot"
           version = "0.2.0"
           edition = "2021"
+
+                   
+          [profile.dev]
+          opt-level = 1
           
           [lib]
           crate-type = ["cdylib"]
@@ -187,4 +191,4 @@ jobs:
             compression-level: 9 # maximum compression
             path: |
                 ${{ github.workspace }}/${OPENSSL_VERSION}/openssl.wasm
-                ${{github.workspace}}/target/wasm32-unknown-emscripten
+                ${{github.workspace}}/target/wasm32-unknown-emscripten/release/libalgodot.wasm
