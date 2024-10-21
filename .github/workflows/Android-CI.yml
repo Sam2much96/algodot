@@ -28,13 +28,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: "Godot-3.5-DEV"
+          ref: "Godot-3.5-TESTNET"
       - name: Install latest nightly
-        uses: actions-rs/toolchain@v1.0.4
+        uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
             override: true
             components: rustfmt, clippy
+            target : armv7-linux-androideabi  
 
       - name: Run cargo check
         uses: actions-rs/cargo@v1.0.1
