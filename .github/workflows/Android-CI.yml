@@ -43,10 +43,35 @@ jobs:
         with:
           command: check
           
-      - name: "Install Java + NDK"
+      - name: "Install Java + NDK 23 " #Godot's Suppported NDK https://github.com/godotengine/godot/blob/master/platform/android/java/app/config.gradle
         run: |
           ls /usr/local/lib/android/sdk/ndk
           ls /usr/local/lib/android/sdk/ndk
+
+          # Remove Newer NDK's
+          rm -rf /usr/local/lib/android/sdk/ndk/27.*
+          rm -rf /usr/local/lib/android/sdk/ndk/26.*
+
+          # Get NDK 23
+          wget "https://dl.google.com/android/repository/android-ndk-r23c-linux.zip"
+
+          ls -al
+
+          # Extract the downloaded NDK package
+          unzip android-ndk-r23*.zip
+          
+          # Move it to the Android SDK directory
+          mv android-ndk-r23* /usr/local/lib/android/sdk/ndk/
+
+          #set ndk in my env
+          export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/android-ndk-r23b
+          
+          # reload Shell
+          source ~/.bashrc  # or ~/.zshrc if you're using Zsh
+
+          #verify NDK version
+          $ANDROID_NDK_HOME/ndk-build --version
+          
           sudo apt-get update
           sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross
           cargo install cargo-ndk
