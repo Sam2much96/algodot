@@ -378,10 +378,12 @@ jobs:
            merge-multiple : true
         
        
-       - name: Archive site content
+       - name: Archive Artifacts
          uses: thedoctor0/zip-release@master
          with:
-            filename: site.zip
+            filename: android.zip
+            path: ~/android/algodot
+            type: zip
        
        - name: Butler Publish
          uses: manleydev/butler-publish-itchio-action@master
@@ -391,7 +393,7 @@ jobs:
            CHANNEL: android
            ITCH_GAME: Algodot
            ITCH_USER: inhumanity-arts
-           PACKAGE: ./site.zip
+           PACKAGE: ./android.zip
         
   
         
