@@ -152,23 +152,26 @@ jobs:
 
       - name: "Fetch Precompiled Openssl 1.1.1l For WASM"
         run: |
-
+          source ${{ github.workspace }}/emsdk/emsdk_env.sh
           
           wget  "https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz"
           tar -xzvf ${OPENSSL_VERSION}.tar.gz
 
-          
+          # Docs: https://github.com/TrueBitFoundation/wasm-ports/blob/master/openssl.sh
           cd ${OPENSSL_VERSION}
+          emconfigure ./Configure linux-generic64 --prefix=$EMSCRIPTEN/system
+
+          sed -i 's|^CROSS_COMPILE.*$|CROSS_COMPILE=|g' Makefile
           
-          # download Compiled OpenSSL Binary
-          wget https://github.com/voltbuilder/openssl-wasm/releases/download/v1.1.1l/openssl.wasm
+          emmake make -j 12 build_generated libssl.a libcrypto.a
+          
           
           ls -al
           
-          ./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
+          #./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
           
-          make
-          ls -al
+          #make
+          #ls -al
 
 
       - name: "WASM compile"
