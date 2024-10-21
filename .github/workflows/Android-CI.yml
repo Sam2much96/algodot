@@ -374,8 +374,9 @@ jobs:
        - name: Download content
          uses: actions/download-artifact@v4
          with: 
-           name: linux
-  
+           path: /android/artefacts
+           merge-multiple : true
+        
        
        - name: Archive site content
          uses: thedoctor0/zip-release@master
@@ -387,8 +388,8 @@ jobs:
          env:
            BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
            BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-           CHANNEL: linux
-           ITCH_GAME: dystopia-app
+           CHANNEL: android
+           ITCH_GAME: Algodot
            ITCH_USER: inhumanity-arts
            PACKAGE: ./site.zip
         
