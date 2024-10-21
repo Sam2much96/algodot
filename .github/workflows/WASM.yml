@@ -185,7 +185,7 @@ jobs:
            RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
 
           #Check For Artefact Filepaths
-          cd ${{github.workspace}}/target/wasm32-unknown-emscripten && ls -al
+          cd ${{github.workspace}}/target/wasm32-unknown-emscripten/release && ls -al
 
       - name: Upload Artifact openssl and algodot
         uses: actions/upload-artifact@v4
@@ -193,5 +193,4 @@ jobs:
             name: "Openssl Wasm"
             compression-level: 9 # maximum compression
             path: |
-                ${{ github.workspace }}/${OPENSSL_VERSION}/openssl.wasm
-                ${{github.workspace}}/target/release/libalgodot.wasm
+                ${{github.workspace}}/target/wasm32-unknown-emscripten/release/libalgodot.wasm
