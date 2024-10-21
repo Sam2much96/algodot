@@ -162,7 +162,7 @@ jobs:
           # download Compiled OpenSSL Binary
           wget https://github.com/voltbuilder/openssl-wasm/releases/download/v1.1.1l/openssl.wasm
           
-          
+          ls -al
           
           ./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
           
@@ -183,6 +183,9 @@ jobs:
           
            # Build Command To Wasm
            RUST_BACKTRSCE=full cargo build --target=wasm32-unknown-emscripten --release
+
+          #Check For Artefact Filepaths
+           cd {{github.workspace}}/target/wasm32-unknown-emscripten && ls -al
 
       - name: Upload Artifact openssl and algodot
         uses: actions/upload-artifact@v4
