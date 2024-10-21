@@ -32,7 +32,7 @@ jobs:
         with:
           ref: "Godot-3.5-DEV"
           ndk-version: r23c
-          add-to-path: false
+          add-to-path: true
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
           
