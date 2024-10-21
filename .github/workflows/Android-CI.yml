@@ -45,7 +45,7 @@ jobs:
           
       - name: "Install Java + NDK"
         run: |
-          ls /usr/local/lib
+          ls /usr/local/lib/android/sdk/ndk
           ls /usr/local/lib/android/sdk/ndk
           sudo apt-get update
           sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross
