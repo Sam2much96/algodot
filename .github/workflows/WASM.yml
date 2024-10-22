@@ -87,10 +87,8 @@ jobs:
           # Check Toml file
           cat Cargo.toml && cd 
           sudo apt-get update -y
-          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross make gcc emscripten -y
+          sudo apt-get install llvm-dev libclang-dev clang g++-multilib gcc-multilib libc6-dev libc6-dev-arm64-cross make gcc -y
 
-          # check emscripten
-          emcc -v
 
           # Go to root dir
           cd && ls -al
@@ -142,13 +140,16 @@ jobs:
           cd emsdk
           
           # Download and install the latest SDK tools.
-          ./emsdk install latest
+          ./emsdk install 3.1.21
 
-          # Make the "latest" SDK "active" for the current user. (writes .emscripten file)
-          ./emsdk activate latest
+          # Make the Godot Copmpatible SDK  for emscripten
+          ./emsdk activate 3.1.21
 
           # Activate PATH and other environment variables in the current terminal
           source ./emsdk_env.sh
+
+          # check emscripten
+          emcc -v
 
       - name: "Fetch Precompiled Openssl 1.1.1l For WASM"
         run: |
@@ -159,12 +160,14 @@ jobs:
 
           # Docs: https://github.com/TrueBitFoundation/wasm-ports/blob/master/openssl.sh
           cd ${OPENSSL_VERSION}
-          emconfigure ./Configure linux-generic64 --prefix=$EMSCRIPTEN/system
+          #emconfigure ./Configure linux-generic64 --prefix=$EMSCRIPTEN/system
+          emconfigure ./Configure gcc no-hw no-shared no-asm no-aes no-threads no-ssl3 no-dtls no-engine no-dso -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom -static --prefix=$EMSCRIPTEN/system
 
           sed -i 's|^CROSS_COMPILE.*$|CROSS_COMPILE=|g' Makefile
           
-          emmake make -j 12 build_generated libssl.a libcrypto.a
-          
+          #emmake make -j 12 build_generated libssl.a libcrypto.a
+          emmake make build_generated build_libs_nodep libssl.a libcrypto.a
+
           
           ls -al
           
