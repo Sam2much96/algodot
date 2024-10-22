@@ -161,7 +161,7 @@ jobs:
           # Docs: https://github.com/TrueBitFoundation/wasm-ports/blob/master/openssl.sh
           cd ${OPENSSL_VERSION}
           #emconfigure ./Configure linux-generic64 --prefix=$EMSCRIPTEN/system
-          emconfigure ./Configure gcc no-hw no-shared no-asm no-aes no-threads no-ssl3 no-dtls no-engine no-dso -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom -static --prefix=$EMSCRIPTEN/system
+          emconfigure ./Configure gcc no-hw no-shared no-asm no-threads no-ssl3 no-dtls no-engine no-dso -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom -static --prefix=$EMSCRIPTEN/system
 
           sed -i 's|^CROSS_COMPILE.*$|CROSS_COMPILE=|g' Makefile
           
