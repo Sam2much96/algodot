@@ -170,6 +170,7 @@ jobs:
           emake make
           
           ls -al
+          cd apps && ls -al
           
           #./Configure gcc -no-sock -no-ui-console -DHAVE_FORK=0 -D_WASI_EMULATED_MMAN -D_WASI_EMULATED_SIGNAL -DOPENSSL_NO_SECURE_MEMORY -DNO_SYSLOG --with-rand-seed=getrandom
           
