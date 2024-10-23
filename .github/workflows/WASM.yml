@@ -167,7 +167,7 @@ jobs:
           
           #emmake make -j 12 build_generated libssl.a libcrypto.a
           emmake make build_generated build_libs_nodep libssl.a libcrypto.a
-
+          emake make
           
           ls -al
           
