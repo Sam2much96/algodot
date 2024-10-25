@@ -75,6 +75,7 @@ jobs:
           algodot_core = { path = "core" }
           algodot_macros = { path = "macros" }
           gdnative = { version = "0.11", features = ["async"] }
+          openssl = { version = "0.10", features = ["vendored"] }
           
           [workspace]
           members = [
