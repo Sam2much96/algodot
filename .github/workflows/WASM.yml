@@ -76,6 +76,9 @@ jobs:
           algodot_macros = { path = "macros" }
           gdnative = { version = "0.11", features = ["async"] }
           openssl = { version = "0.10", features = ["vendored"] }
+          tokio = { version = "1.10", features = ["rt"] }
+          futures = "0.3"
+          serde = "1.0"
           
           [workspace]
           members = [

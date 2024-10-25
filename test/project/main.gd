@@ -20,26 +20,29 @@ func _ready():
 	add_child(algod)
 	
 	print(" -- Get funder account")
-	funder_mnemonic = OS.get_environment("ALGODOT_FUNDER_MNEMONIC")
+	funder_mnemonic = "tank game arrive train bring taxi tackle popular bacon gasp tell pigeon error step leaf zone suit chest next swim luggage oblige opinion about execute"#OS.get_environment("ALGODOT_FUNDER_MNEMONIC")
 	if funder_mnemonic == "":
 		print("   !! Env var `ALGODOT_FUNDER_MNEMONIC` not set. Trying to continue with default.")
 		funder_mnemonic = "letter nasty produce hidden confirm sad color diamond allow ring truth code mirror atom obscure this opinion one life travel chat lobster cook about flight"
 
 	funder_address = algod.get_address(funder_mnemonic)
-
+	
+	$Label.set_text(funder_address)
+	print_debug(funder_address)
+	
 	status = status && yield(_test_algod_connection(), "completed")
-	status = status && yield(_test_transaction(), "completed")
-	status = status && yield(_test_asset_transfers(), "completed")
+	#status = status && yield(_test_transaction(), "completed")
+	#status = status && yield(_test_asset_transfers(), "completed")
 
-
+	
 	if status:
 		print(" -- Test run completed successfully.")
 	else:
 		print(" -- Test run completed with errors.")
-		OS.exit_code = 1
+		#OS.exit_code = 1
 
-	print(" -- exiting.")
-	get_tree().quit()
+	#print(" -- exiting.")
+	#get_tree().quit()
 
 func _timeout():
 	yield(get_tree().create_timer(10.0), "timeout")

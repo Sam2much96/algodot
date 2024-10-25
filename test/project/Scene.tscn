@@ -10,3 +10,9 @@ script = ExtResource( 1 )
 script = ExtResource( 2 )
 funder_mnemonic = "height decade cable deliver magnet approve chief only bicycle minute afford toilet increase scene armed thrive then grief spy away medal quiz copper able broccoli"
 receivers_mnemonic = "rigid steak better media circle nothing range tray firm fatigue pool damage welcome supply police spoon soul topic grant offer chimney total bronze able human"
+
+[node name="Label" type="Label" parent="."]
+margin_right = 340.0
+margin_bottom = 202.0
+rect_scale = Vector2( 3, 3 )
+text = "aSDFsdfwdfwdfwdf"

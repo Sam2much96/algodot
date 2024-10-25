@@ -351,7 +351,7 @@ func transferAssets(params,_funder_mnemonic: String ,  _receiver_address : Strin
 	var _funder_address=algod.get_address(_funder_mnemonic)
 	
 	# Construct Aset tx
-	construct_asset_transfer(params,_funder_address, _receiver_address, _amount, _asset_id)
+	construct_asset_transfer(_funder_address, _receiver_address, _amount, _asset_id)
 	
 	# Raw Sign Asset tx
 	stx = algod.sign_transaction(asset_tx, _funder_mnemonic)
