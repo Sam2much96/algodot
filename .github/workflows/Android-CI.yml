@@ -12,7 +12,7 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     # DOcumentation : https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
-    - cron:  '30 5,17 * * *'
+    - cron:  "0 0,5 30 * *"   #Runs at 00 and 31 every month #
   
     
 env:
